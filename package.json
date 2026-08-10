@@ -1,0 +1,16 @@
+{
+  "name": "stride-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:backend && npm run build:web",
+    "build:web": "npm --prefix web run build",
+    "build:backend": "npm --prefix backend run prisma:generate && npm --prefix backend run build",
+    "start:backend": "npm --prefix backend run start:dev",
+    "start:web": "npm --prefix web run dev",
+    "test": "npm --prefix backend run test"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.10"
+  }
+}

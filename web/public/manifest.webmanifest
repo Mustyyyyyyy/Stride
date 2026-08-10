@@ -1,0 +1,23 @@
+{
+  "name": "Stride Fitness & GPS Tracker",
+  "short_name": "Stride",
+  "description": "Premium Fitness, Running & GPS Route Tracker Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
