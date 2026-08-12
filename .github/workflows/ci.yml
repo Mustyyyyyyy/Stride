@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: stride
+          POSTGRES_PASSWORD: stride
+          POSTGRES_DB: stridedb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        run: npm --prefix backend ci
+
+      - name: Generate Prisma Client
+        run: npm --prefix backend run prisma:generate
+        env:
+          DATABASE_URL: postgresql://stride:stride@localhost:5432/stridedb
+
+      - name: Run DB migrations
+        run: npm --prefix backend run prisma:migrate
+        env:
+          DATABASE_URL: postgresql://stride:stride@localhost:5432/stridedb
+
+      - name: Build backend
+        run: npm run build:backend
+        env:
+          DATABASE_URL: postgresql://stride:stride@localhost:5432/stridedb
+
+      - name: Run backend tests
+        run: npm --prefix backend run test
+        env:
+          DATABASE_URL: postgresql://stride:stride@localhost:5432/stridedb
+
+  web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: Install web dependencies
+        run: npm --prefix web ci
+
+      - name: Build web
+        run: npm run build:web
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+        working-directory: ./web

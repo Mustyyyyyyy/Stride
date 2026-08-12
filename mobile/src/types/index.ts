@@ -10,6 +10,7 @@ export interface GpsPoint {
 }
 
 export interface WorkoutActivity {
+  startLocation: any;
   id: string;
   userId: string;
   type: ActivityType;
@@ -25,8 +26,6 @@ export interface WorkoutActivity {
   notes?: string;
   startTime: string;
   endTime: string;
-  startLocation?: string;
-  endLocation?: string;
   gpsPoints?: GpsPoint[];
 }
 

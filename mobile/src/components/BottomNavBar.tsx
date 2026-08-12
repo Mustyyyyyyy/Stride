@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { LayoutDashboard, History, Bell, Share2, BarChart3, Target } from 'lucide-react-native';
+import { LayoutDashboard, History, Bell, Share2, Settings } from 'lucide-react-native';
 
-type NavTab = 'dashboard' | 'history' | 'notifications' | 'feed' | 'others';
+type NavTab = 'dashboard' | 'history' | 'notifications' | 'feed' | 'settings';
 
 interface BottomNavBarProps {
   activeTab: NavTab;
@@ -42,10 +42,10 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onTabChan
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.tab}
-        onPress={() => onTabChange('others')}
+        onPress={() => onTabChange('settings')}
       >
-        <BarChart3 size={22} color={activeTab === 'others' ? '#10b981' : '#64748b'} />
-        <Text style={[styles.tabText, activeTab === 'others' && styles.tabTextActive]}>More</Text>
+        <Settings size={22} color={activeTab === 'settings' ? '#10b981' : '#64748b'} />
+        <Text style={[styles.tabText, activeTab === 'settings' && styles.tabTextActive]}>Settings</Text>
       </TouchableOpacity>
     </View>
   );

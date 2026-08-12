@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AchievementsService, AchievementsController } from './achievements.service';
+import { AchievementsService } from './achievements.service';
+import { AchievementsController } from './achievements.controller';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({

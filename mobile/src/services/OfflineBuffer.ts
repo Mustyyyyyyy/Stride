@@ -1,6 +1,5 @@
 import { WorkoutActivity } from '../types';
-
-const OFFLINE_WORKOUTS_KEY = 'stride_offline_workouts';
+import { Storage, KEYS } from './Storage';
 
 export class OfflineBuffer {
   private static localQueue: WorkoutActivity[] = [];
@@ -8,23 +7,21 @@ export class OfflineBuffer {
   static saveWorkoutLocally(workout: WorkoutActivity): void {
     this.localQueue.push(workout);
     try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(OFFLINE_WORKOUTS_KEY, JSON.stringify(this.localQueue));
-      }
+      Storage.setString(KEYS.OFFLINE_WORKOUTS, JSON.stringify(this.localQueue));
     } catch (e) {
-      console.log('Saved workout locally in memory buffer.');
+      // in-memory fallback already contains it
     }
   }
 
   static getPendingOfflineWorkouts(): WorkoutActivity[] {
     try {
-      if (typeof localStorage !== 'undefined') {
-        const stored = localStorage.getItem(OFFLINE_WORKOUTS_KEY);
-        if (stored) {
-          this.localQueue = JSON.parse(stored);
-        }
+      const stored = Storage.getString(KEYS.OFFLINE_WORKOUTS);
+      if (stored) {
+        this.localQueue = JSON.parse(stored);
       }
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
     return this.localQueue;
   }
 
@@ -46,9 +43,7 @@ export class OfflineBuffer {
 
     this.localQueue = remaining;
     try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(OFFLINE_WORKOUTS_KEY, JSON.stringify(remaining));
-      }
+      Storage.setString(KEYS.OFFLINE_WORKOUTS, JSON.stringify(remaining));
     } catch (e) {}
 
     return syncedCount;

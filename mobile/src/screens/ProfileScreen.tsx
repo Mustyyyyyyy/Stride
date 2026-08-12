@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { User, Settings, Save, Moon, Sun } from 'lucide-react-native';
+import { Storage, KEYS } from '../services/Storage';
+import { api } from '../services/api';
 
 export const ProfileScreen: React.FC = () => {
   const { user, updateProfile } = useAuthStore();
@@ -20,6 +22,17 @@ export const ProfileScreen: React.FC = () => {
       </View>
     );
   }
+
+  const deviceId = Storage.getString(KEYS.DEVICE_ID) || 'unknown';
+
+  const handleLinkDevice = async () => {
+    try {
+      await api.linkDevice(deviceId);
+      alert('Device linked to your account.');
+    } catch (e) {
+      alert('Unable to link device. Backend may not support device linking.');
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -72,6 +85,17 @@ export const ProfileScreen: React.FC = () => {
             <View style={styles.themeIcon}>
               {user.theme === 'DARK' ? <Moon size={20} color="#f59e0b" /> : <Sun size={20} color="#6366f1" />}
             </View>
+          </View>
+        </View>
+
+        <View style={{ marginTop: 16 }}>
+          <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Device</Text>
+          <View style={styles.card}>
+            <Text style={styles.label}>Device ID</Text>
+            <Text style={{ color: '#94a3b8', marginBottom: 12 }}>{deviceId}</Text>
+            <TouchableOpacity style={[styles.saveBtn, { backgroundColor: '#06b6d4' }]} onPress={handleLinkDevice}>
+              <Text style={styles.saveBtnText}>Link this device</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>

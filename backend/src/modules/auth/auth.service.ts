@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException, BadRequestExcepti
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RefreshToken } from '@prisma/client';
 import { RegisterDto, LoginDto, RefreshTokenDto } from './dtos/auth.dto';
 
 @Injectable()
@@ -71,6 +72,25 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET || 'stride_super_secret_jwt_refresh_key_2026',
       });
 
+      // Validate the refresh token exists in the database and is not revoked
+      const storedToken = await this.prisma.refreshToken.findFirst({
+        where: {
+          token: dto.refreshToken,
+          userId: payload.sub,
+          revoked: false,
+        },
+      });
+
+      if (!storedToken) {
+        throw new UnauthorizedException('Refresh token is invalid or has been revoked.');
+      }
+
+      // Optionally revoke the old refresh token for security (rotation)
+      await this.prisma.refreshToken.update({
+        where: { id: storedToken.id },
+        data: { revoked: true },
+      });
+
       const tokens = await this.generateTokens(payload.sub, payload.email);
       return tokens;
     } catch {
@@ -94,6 +114,15 @@ export class AuthService {
         expiresIn: '30d',
       },
     );
+
+    // Persist the refresh token in the database
+    await this.prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      },
+    });
 
     return {
       accessToken,

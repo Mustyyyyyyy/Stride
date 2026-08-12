@@ -27,10 +27,14 @@
     "react-native-screens": "^3.29.0",
     "react-native-svg": "^14.1.0",
     "react-native-vector-icons": "^10.0.3",
+    "@dongminyu/react-native-step-counter": "^0.3.0",
     "zod": "^3.22.4",
-    "zustand": "^4.5.0"
+    "zustand": "^4.5.0",
+    "react-native-view-shot": "^3.4.0",
+    "react-native-share": "^10.0.0"
   },
   "devDependencies": {
+    "@react-native-community/cli": "latest",
     "@babel/core": "^7.20.0",
     "@babel/preset-env": "^7.20.0",
     "@babel/runtime": "^7.20.0",

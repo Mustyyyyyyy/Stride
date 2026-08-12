@@ -27,6 +27,7 @@ model User {
   goals            Goal[]
   userAchievements UserAchievement[]
   notifications    Notification[]
+  devices          Device[]
 }
 
 model RefreshToken {
@@ -122,4 +123,12 @@ model Notification {
   type      String   @default("INFO")
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Device {
+  id        String   @id @default(uuid())
+  deviceId  String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedAt  DateTime @default(now())
 }

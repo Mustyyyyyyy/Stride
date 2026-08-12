@@ -13,7 +13,8 @@ import { FeedPage } from './pages/FeedPage';
 import { ChallengesPage } from './pages/ChallengesPage';
 import { AnimeSplashScreen } from './components/AnimeSplashScreen';
 import { AuthPage } from './pages/AuthPage';
-import { WifiOff, X } from 'lucide-react';
+import { WifiOff } from 'lucide-react';
+import { PWAInstallBanner } from './components/PWAInstallBanner';
 
 export const App: React.FC = () => {
   // ─── ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT TOP ─────────────────────
@@ -82,6 +83,8 @@ export const App: React.FC = () => {
         {activePage === 'feed'           && <FeedPage />}
         {activePage === 'challenges'     && <ChallengesPage />}
       </main>
+
+      <PWAInstallBanner />
     </div>
   );
 };

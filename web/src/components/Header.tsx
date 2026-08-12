@@ -11,23 +11,37 @@ export const Header: React.FC = () => {
 
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
     };
+    const handleOpenInstall = () => setShowInstallModal(true);
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('open-pwa-install', handleOpenInstall);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('open-pwa-install', handleOpenInstall);
+    };
+  }, []);
+
+  useEffect(() => {
+    const mobile = /Android|iPhone|iPod|iPad/i.test(navigator.userAgent);
+    setIsMobile(mobile);
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || (window as any).navigator.standalone;
+    setIsStandalone(standalone);
   }, []);
 
   const handleInstallClick = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
-    } else {
-      setShowInstallModal(true);
-    }
+    setShowInstallModal(true);
+  };
+
+  const openNativeApp = () => {
+    window.location.href = 'stride://';
+    setTimeout(() => setShowInstallModal(false), 1500);
   };
 
   // ─── Desktop nav (all pages) ──────────────────────────────────────────────
@@ -101,15 +115,16 @@ export const Header: React.FC = () => {
 
           {/* ─── Right-side controls ─── */}
           <div className="flex items-center gap-2">
-            {/* Install PWA (desktop only) */}
-            <button
-              onClick={handleInstallClick}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold transition-all hover:bg-emerald-500/20"
-              title="Install Stride App"
-            >
-              <Smartphone className="w-4 h-4" />
-              <span className="hidden lg:inline">Install App</span>
-            </button>
+            {!isStandalone && (
+              <button
+                onClick={handleInstallClick}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold transition-all hover:bg-emerald-500/20 ${isMobile ? 'sm:flex' : ''}`}
+                title="Get Stride App"
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>Get App</span>
+              </button>
+            )}
 
             {/* Theme toggle */}
             <button
@@ -202,29 +217,43 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-slate-950 font-black text-2xl">⚡</div>
               <div>
-                <h3 className="text-xl font-extrabold font-display text-white">Install Stride App</h3>
-                <p className="text-xs text-slate-400">Install directly on Android or iPhone</p>
+                <h3 className="text-xl font-extrabold font-display text-white">Get Stride</h3>
+                <p className="text-xs text-slate-400">Install the app for the best experience</p>
               </div>
             </div>
             <div className="space-y-3 pt-2 text-xs">
               <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm"><span>📱 iPhone / iOS:</span></div>
-                <ol className="list-decimal list-inside space-y-1.5 text-slate-300">
-                  <li>Open in <strong className="text-white">Safari</strong>.</li>
-                  <li>Tap <strong className="text-white"><Share className="w-3.5 h-3.5 inline text-cyan-400" /> Share</strong> at bottom.</li>
-                  <li>Tap <strong className="text-emerald-400">"Add to Home Screen" <PlusSquare className="w-3.5 h-3.5 inline" /></strong>.</li>
-                </ol>
+                <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm"><span>📱 Native App:</span></div>
+                <p className="text-slate-300 mb-2">Download from the App Store or Google Play for the full experience with GPS tracking, offline mode, and push notifications.</p>
+                <button
+                  onClick={openNativeApp}
+                  className="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs"
+                >
+                  Open Native App
+                </button>
               </div>
               <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
-                <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm"><span>🤖 Android:</span></div>
+                <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm"><span>🌐 Install Web App:</span></div>
                 <ol className="list-decimal list-inside space-y-1.5 text-slate-300">
-                  <li>Open in <strong className="text-white">Chrome or Edge</strong>.</li>
-                  <li>Tap <strong className="text-white">⋮ menu icon</strong>.</li>
-                  <li>Select <strong className="text-cyan-400">"Install app"</strong> or <strong className="text-cyan-400">"Add to Home screen"</strong>.</li>
+                  <li>Tap the browser <strong className="text-white"><Share className="w-3.5 h-3.5 inline text-cyan-400" /> Share</strong> button.</li>
+                  <li>Scroll down and tap <strong className="text-emerald-400">"Add to Home Screen"</strong>.</li>
+                  <li>Open Stride from your home screen like a regular app.</li>
                 </ol>
               </div>
+              {deferredPrompt && (
+                <button
+                  onClick={() => {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
+                    setShowInstallModal(false);
+                  }}
+                  className="w-full py-3 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs"
+                >
+                  Install Web App
+                </button>
+              )}
             </div>
-            <button onClick={() => setShowInstallModal(false)} className="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">Got It!</button>
+            <button onClick={() => setShowInstallModal(false)} className="w-full py-3 rounded-xl bg-slate-800 text-white font-bold text-xs hover:bg-slate-700">Close</button>
           </div>
         </div>
       )}

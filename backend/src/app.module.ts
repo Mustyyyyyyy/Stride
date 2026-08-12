@@ -11,6 +11,7 @@ import { StatsModule } from './modules/stats/stats.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { FeedModule } from './modules/feed/feed.module';
 import { ChallengesModule } from './modules/challenges/challenges.module';
+import { DevicesModule } from './modules/devices/devices.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ChallengesModule } from './modules/challenges/challenges.module';
     NotificationsModule,
     FeedModule,
     ChallengesModule,
+    DevicesModule,
   ],
 })
 export class AppModule {}

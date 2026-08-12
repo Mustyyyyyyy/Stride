@@ -20,9 +20,11 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
 };
 
 export const HistoryScreen: React.FC = () => {
-  const { recentActivities } = useActivityStore();
+  const { recentActivities, addManualActivity, deleteActivity } = useActivityStore();
   const [filter, setFilter] = useState('ALL');
   const [query, setQuery] = useState('');
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ title: '', type: 'WALKING', distance: '0', duration: '0', steps: '0', calories: '0' });
 
   const filtered = recentActivities.filter((act) => {
     if (filter !== 'ALL' && act.type !== filter) return false;
@@ -30,19 +32,70 @@ export const HistoryScreen: React.FC = () => {
     return true;
   });
 
-  if (recentActivities.length === 0) {
+  const onAdd = async () => {
+    const payload: Partial<any> = {
+      title: form.title || undefined,
+      type: form.type as any,
+      distance: Number(form.distance) || 0,
+      duration: Number(form.duration) || 0,
+      steps: Number(form.steps) || 0,
+      calories: Number(form.calories) || 0,
+      startTime: new Date().toISOString(),
+      endTime: new Date().toISOString(),
+    };
+    await addManualActivity(payload);
+    setShowAdd(false);
+    setForm({ title: '', type: 'WALKING', distance: '0', duration: '0', steps: '0', calories: '0' });
+  };
+
+  const onDelete = (id: string) => {
+    // confirm deletion
+    try {
+      // simple confirm using window-like API isn't available; use JS confirm fallback
+      const ok = (global as any).confirm ? (global as any).confirm('Delete this workout?') : true;
+      if (ok) deleteActivity(id);
+    } catch {
+      deleteActivity(id);
+    }
+  };
+
+  if (recentActivities.length === 0 && !showAdd) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyTitle}>No activities yet</Text>
         <Text style={styles.emptySub}>Start a workout to build your history.</Text>
+        <TouchableOpacity style={styles.onboardingButton} onPress={() => setShowAdd(true)}>
+          <Text style={styles.onboardingButtonText}>Add workout</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Activity History</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={styles.title}>Activity History</Text>
+        <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd((s) => !s)}>
+          <Text style={styles.addBtnText}>{showAdd ? 'Cancel' : 'Add'}</Text>
+        </TouchableOpacity>
+      </View>
+
       <Text style={styles.subtitle}>Your recorded GPS workouts</Text>
+
+      {showAdd && (
+        <View style={styles.addCard}>
+          <TextInput style={styles.input} placeholder="Title" placeholderTextColor="#64748b" value={form.title} onChangeText={(t) => setForm((s) => ({ ...s, title: t }))} />
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TextInput style={[styles.input, { flex: 1 }]} placeholder="Distance (m)" keyboardType="numeric" value={form.distance} onChangeText={(t) => setForm((s) => ({ ...s, distance: t }))} />
+            <TextInput style={[styles.input, { flex: 1 }]} placeholder="Duration (s)" keyboardType="numeric" value={form.duration} onChangeText={(t) => setForm((s) => ({ ...s, duration: t }))} />
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TextInput style={[styles.input, { flex: 1 }]} placeholder="Steps" keyboardType="numeric" value={form.steps} onChangeText={(t) => setForm((s) => ({ ...s, steps: t }))} />
+            <TextInput style={[styles.input, { flex: 1 }]} placeholder="Calories" keyboardType="numeric" value={form.calories} onChangeText={(t) => setForm((s) => ({ ...s, calories: t }))} />
+          </View>
+          <TouchableOpacity style={styles.saveBtn} onPress={onAdd}><Text style={styles.saveBtnText}>Save workout</Text></TouchableOpacity>
+        </View>
+      )}
 
       <View style={styles.searchRow}>
         <View style={styles.searchBox}>
@@ -80,6 +133,9 @@ export const HistoryScreen: React.FC = () => {
                   {new Date(act.startTime).toLocaleDateString()} • {(act.distance / 1000).toFixed(2)} km
                 </Text>
               </View>
+              <TouchableOpacity onPress={() => onDelete(act.id)} style={{ marginLeft: 8 }}>
+                <Text style={{ color: '#ef4444', fontWeight: '700' }}>Delete</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.cardMetrics}>
               <View style={styles.metricBox}>

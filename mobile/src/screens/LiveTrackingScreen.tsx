@@ -1,10 +1,12 @@
 ﻿import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, PermissionsAndroid, ScrollView } from 'react-native';
+import { AppState, View, Text, StyleSheet, TouchableOpacity, Platform, PermissionsAndroid, ScrollView, Share } from 'react-native';
 import { useActivityStore } from '../store/useActivityStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { GpsEngine } from '../services/GpsEngine';
-import { Timer, Navigation, Gauge, Activity, Pause, Play, Square } from 'lucide-react-native';
-
-const MAPBOX_ACCESS_TOKEN = 'YOUR_MAPBOX_ACCESS_TOKEN';
+import { Timer, Navigation, Gauge, Activity, Pause, Play, Square, Zap, Footprints, Bike, Mountain, MapPin } from 'lucide-react-native';
+import { ShareCard } from '../components/ShareCard';
+import ViewShot from 'react-native-view-shot';
+import { MAPBOX_CONFIG } from '../config/mapbox';
 
 type ActivityType = 'RUNNING' | 'WALKING' | 'CYCLING' | 'HIKING';
 
@@ -32,12 +34,60 @@ export const LiveTrackingScreen: React.FC = () => {
     finishWorkout,
     tickTimer,
     addGpsPoint,
+    useRealSteps,
   } = useActivityStore();
 
   const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
   const [useRealGps, setUseRealGps] = useState(false);
   const [showActivitySelector, setShowActivitySelector] = useState(true);
-  const watchRef = useRef<any>(null);
+  const gpsStartedRef = useRef(false);
+  const shareCardRef = useRef<any>(null);
+
+  const shareWorkoutImage = async (workout: any) => {
+    try {
+      if (shareCardRef.current?.capture) {
+        const uri = await shareCardRef.current.capture({ format: 'png', quality: 0.95, result: 'tmpfile' });
+        if (!uri) throw new Error('Capture returned empty URI');
+
+        // Try react-native-share first (handles Android FileProvider properly)
+        try {
+          const RNShare = require('react-native-share').default;
+          const shareUrl = Platform.select({ ios: uri, android: 'file://' + uri });
+          await RNShare.open({
+            url: shareUrl,
+            type: 'image/png',
+            title: 'My Stride workout',
+            subject: 'My Stride workout',
+          });
+          return;
+        } catch {
+          // Fallback to built-in Share if react-native-share is not available
+        }
+
+        const shareUrl = uri.startsWith('file://') ? uri : 'file://' + uri;
+        await Share.share({ url: shareUrl, title: 'My Stride workout' } as any);
+        return;
+      }
+    } catch (e) {
+      // Fallback to a richer text share if image capture fails
+    }
+
+    const pace = workout.distance > 0 && workout.duration > 0 ? ((workout.duration / 60) / (workout.distance / 1000)).toFixed(2) : '0.00';
+    const msg = [
+      `${workout.title || 'Workout'} 🏃`,
+      `📅 ${new Date(workout.startTime).toLocaleString()}`,
+      `📏 ${(workout.distance / 1000).toFixed(2)} km`,
+      `⏱ ${Math.round(workout.duration / 60)} min`,
+      `⚡ ${pace} min/km`,
+      `🔥 ${Math.round(workout.calories)} kcal`,
+      `👟 ${(workout.steps || 0).toLocaleString()} steps`,
+      `📍 ${workout.gpsPoints?.length || 0} GPS points`,
+      ``,
+      `Proudly tracked with Stride`,
+      `https://stride-six-sepia.vercel.app/`,
+    ].join('\n');
+    await Share.share({ message: msg, title: 'My Stride workout' } as any);
+  };
 
   useEffect(() => {
     if (!isTracking || isPaused) return;
@@ -47,7 +97,18 @@ export const LiveTrackingScreen: React.FC = () => {
     return () => clearInterval(timer);
   }, [isTracking, isPaused, tickTimer]);
 
+  // Reset activity selector when workout finishes so user can pick another activity
   useEffect(() => {
+    if (!isTracking) {
+      setShowActivitySelector(true);
+      setUseRealGps(false);
+      setGpsAccuracy(null);
+      gpsStartedRef.current = false;
+    }
+  }, [isTracking]);
+
+  useEffect(() => {
+    if (!isTracking) return;
     let mounted = true;
 
     const requestLocationPermission = async () => {
@@ -78,40 +139,59 @@ export const LiveTrackingScreen: React.FC = () => {
 
     return () => {
       mounted = false;
-      if (watchRef.current) {
-        try {
-          if (Platform.OS === 'android' && watchRef.current.clear) {
-            watchRef.current.clear();
-          }
-        } catch {
-          // cleanup
-        }
+    };
+  }, [isTracking]);
+
+  useEffect(() => {
+    if (!isTracking) {
+      gpsStartedRef.current = false;
+      setUseRealGps(false);
+      setGpsAccuracy(null);
+      return;
+    }
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active' && isTracking && !gpsStartedRef.current) {
+        startRealGps();
       }
+    });
+
+    return () => {
+      subscription.remove();
     };
   }, [isTracking]);
 
   const startRealGps = () => {
+    if (gpsStartedRef.current) return;
+
     try {
       const BackgroundGeolocation = require('react-native-background-geolocation').default;
       if (!BackgroundGeolocation) return;
 
       BackgroundGeolocation.on('location', (location: any) => {
-        if (!isPaused && location.coords) {
-          addGpsPoint(
-            location.coords.latitude,
-            location.coords.longitude,
-            location.coords.speed || 0,
-            location.coords.accuracy || 5,
-            location.coords.altitude || 0,
-          );
-          if (location.coords.accuracy) {
-            setGpsAccuracy(location.coords.accuracy);
-          }
+        const state = useActivityStore.getState();
+        if (!state.isTracking || state.isPaused || !location?.coords) return;
+
+        addGpsPoint(
+          location.coords.latitude,
+          location.coords.longitude,
+          location.coords.speed || 0,
+          location.coords.accuracy || 5,
+          location.coords.altitude || 0,
+        );
+        if (location.coords.accuracy) {
+          setGpsAccuracy(location.coords.accuracy);
         }
       });
 
       BackgroundGeolocation.on('motionchange', (isMoving: boolean) => {
         // Could auto-pause when stationary
+      });
+
+      BackgroundGeolocation.on('providerchange', (provider: any) => {
+        if (provider.enabled) {
+          setGpsAccuracy(null);
+        }
       });
 
       BackgroundGeolocation.start({
@@ -122,11 +202,16 @@ export const LiveTrackingScreen: React.FC = () => {
         notificationText: 'Tracking your activity in background',
         debug: false,
         pauseLocationUpdates: false,
+        stopOnTerminate: false,
+        startOnBoot: true,
+        foregroundService: true,
+        disableStopDetection: false,
+        preventSuspend: true,
       });
 
+      gpsStartedRef.current = true;
       setUseRealGps(true);
-    } catch {
-      // Native module not available, simulation continues
+    } catch (error) {
       setUseRealGps(false);
     }
   };
@@ -172,9 +257,21 @@ export const LiveTrackingScreen: React.FC = () => {
     <View style={styles.container}>
       {/* Map Placeholder / Live GPS Feed */}
       <View style={styles.mapMock}>
-        <Text style={styles.mapText}>
-          {useRealGps ? 'ðŸ“ Live GPS Feed Active' : 'ðŸ“ Simulated GPS Tracking'}
-        </Text>
+        <View style={styles.mapHeader}>
+          <MapPin size={20} color="#10b981" />
+          <Text style={styles.mapText}>
+            {useRealGps ? 'Live GPS Tracking' : 'Simulated GPS Tracking'}
+          </Text>
+        </View>
+        {MAPBOX_CONFIG.accessToken !== 'YOUR_MAPBOX_ACCESS_TOKEN_HERE' ? (
+          <View style={styles.mapboxBadge}>
+            <Text style={styles.mapboxBadgeText}>MAPBOX READY</Text>
+          </View>
+        ) : (
+          <View style={[styles.mapboxBadge, styles.mapboxBadgeUnconfigured]}>
+            <Text style={styles.mapboxBadgeTextUnconfigured}>ADD MAPBOX TOKEN IN config/mapbox.ts</Text>
+          </View>
+        )}
         {gpsAccuracy !== null && (
           <View style={styles.accuracyBadge}>
             <Text style={styles.accuracyText}>GPS ACC: {Math.round(gpsAccuracy)}M</Text>
@@ -182,14 +279,44 @@ export const LiveTrackingScreen: React.FC = () => {
         )}
         {!useRealGps && (
           <View style={styles.liveBadge}>
-            <Text style={styles.liveBadgeText}>SIMULATION MODE â€¢ NOISE FILTER ACTIVE</Text>
+            <Text style={styles.liveBadgeText}>SIMULATION MODE • NOISE FILTER ACTIVE</Text>
           </View>
         )}
         {useRealGps && (
           <View style={[styles.liveBadge, styles.realGpsBadge]}>
-            <Text style={styles.liveBadgeText}>REAL GPS â€¢ {gpsPoints.length} POINTS</Text>
+            <Text style={styles.liveBadgeText}>REAL GPS • {gpsPoints.length} POINTS</Text>
           </View>
         )}
+        {useRealSteps && (
+          <View style={[styles.liveBadge, styles.realStepsBadge]}>
+            <Text style={styles.liveBadgeText}>REAL STEPS • {stepsCount.toLocaleString()}</Text>
+          </View>
+        )}
+
+        {/* Hidden share card used for capturing a styled image */}
+        <View style={{ position: 'absolute', left: -2000, top: -2000 }}>
+          <ViewShot ref={shareCardRef} options={{ format: 'png', quality: 0.95 }} style={{ width: 900, height: 520 }}>
+            <ShareCard
+              workout={{
+                id: 'preview',
+                userId: '',
+                type: selectedActivityType,
+                title: `${selectedActivityType.charAt(0) + selectedActivityType.slice(1).toLowerCase()} Workout`,
+                distance: distanceMeters,
+                duration: elapsedSeconds,
+                calories: caloriesBurned,
+                averageSpeed: currentSpeedMs,
+                maxSpeed: currentSpeedMs,
+                averagePace: averagePaceMinKm,
+                steps: stepsCount,
+                startTime: new Date(Date.now() - elapsedSeconds * 1000).toISOString(),
+                endTime: new Date().toISOString(),
+                gpsPoints,
+              }}
+              userName={useAuthStore.getState().user?.fullName}
+            />
+          </ViewShot>
+        </View>
       </View>
 
       {/* Primary Metrics Grid */}
@@ -243,6 +370,7 @@ export const LiveTrackingScreen: React.FC = () => {
         </View>
       </View>
 
+
       {/* Action Buttons */}
       <View style={styles.actionRow}>
         {isPaused ? (
@@ -256,7 +384,15 @@ export const LiveTrackingScreen: React.FC = () => {
             <Text style={styles.btnText}>PAUSE</Text>
           </TouchableOpacity>
         )}
-        <TouchableOpacity style={[styles.btn, styles.finishBtn]} onPress={finishWorkout}>
+        <TouchableOpacity style={[styles.btn, styles.finishBtn]} onPress={async () => {
+          const workout = await finishWorkout();
+          // allow user to share the workout card after saving
+          try {
+            await shareWorkoutImage(workout as any);
+          } catch {
+            // ignore
+          }
+        }}>
           <Square size={18} color="#ffffff" fill="#ffffff" />
           <Text style={styles.finishBtnText}>FINISH & SAVE</Text>
         </TouchableOpacity>
@@ -268,12 +404,18 @@ export const LiveTrackingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#090d16', padding: 16 },
   mapMock: { height: 280, backgroundColor: '#111827', borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 16, position: 'relative', borderWidth: 1, borderColor: '#1f2937' },
+  mapHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 8 },
   mapText: { color: '#10b981', fontWeight: '700', fontSize: 14 },
+  mapboxBadge: { position: 'absolute', top: 12, right: 12, backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#10b98133' },
+  mapboxBadgeText: { color: '#10b981', fontSize: 10, fontWeight: '700' },
+  mapboxBadgeUnconfigured: { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef444433' },
+  mapboxBadgeTextUnconfigured: { color: '#ef4444', fontSize: 9, fontWeight: '700' },
   accuracyBadge: { position: 'absolute', top: 12, left: 12, backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#10b98133' },
   accuracyText: { color: '#10b981', fontSize: 10, fontWeight: '700' },
   liveBadge: { position: 'absolute', bottom: 12, right: 12, backgroundColor: 'rgba(245, 158, 11, 0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#f59e0b33' },
   liveBadgeText: { color: '#f59e0b', fontSize: 10, fontWeight: '700' },
   realGpsBadge: { backgroundColor: 'rgba(16, 185, 129, 0.15)', borderColor: '#10b98133' },
+  realStepsBadge: { backgroundColor: 'rgba(6, 182, 212, 0.15)', borderColor: '#06b6d433' },
   metricsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 12 },
   metricCard: { width: '48%', backgroundColor: '#111827', borderRadius: 14, padding: 14, marginBottom: 10, alignItems: 'center', borderWidth: 1, borderColor: '#1f2937' },
   metricIconBox: { width: 32, height: 32, borderRadius: 10, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', alignItems: 'center', justifyContent: 'center', marginBottom: 6 },

@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { ActivityType, GpsPoint, WorkoutActivity } from '../types';
 import { GpsEngine } from '../services/GpsEngine';
 import { OfflineBuffer } from '../services/OfflineBuffer';
+import { stepCounter } from '../services/StepCounter';
+import { Storage, KEYS } from '../services/Storage';
 import { api } from '../services/api';
 
 interface ActivityTrackingState {
@@ -20,9 +22,12 @@ interface ActivityTrackingState {
   gpsPoints: GpsPoint[];
   recentActivities: WorkoutActivity[];
   isLoading: boolean;
+  useRealSteps: boolean;
+  startPedometerSteps: number;
+  workoutStepCallback?: (steps: number) => void;
 
   setActivityType: (type: ActivityType) => void;
-  startWorkout: () => void;
+  startWorkout: () => Promise<void>;
   pauseWorkout: () => void;
   resumeWorkout: () => void;
   addGpsPoint: (lat: number, lon: number, speed?: number, accuracy?: number, alt?: number) => void;
@@ -48,24 +53,59 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
   gpsPoints: [],
   isLoading: false,
   recentActivities: [],
+  useRealSteps: false,
+  startPedometerSteps: 0,
+  workoutStepCallback: undefined,
 
   hydrateFromApi: async () => {
     set({ isLoading: true });
+    let localActivities: WorkoutActivity[] = [];
+    try {
+      const rawSaved = Storage.getString(KEYS.WORKOUT_HISTORY);
+      if (rawSaved) {
+        localActivities = JSON.parse(rawSaved) as WorkoutActivity[];
+      }
+    } catch {
+      localActivities = [];
+    }
+
+    if (localActivities.length > 0) {
+      set({ recentActivities: localActivities });
+    }
+
     try {
       const activities = await api.getActivities();
       if (activities && activities.length > 0) {
-        set({ recentActivities: activities, isLoading: false });
+        const merged = [...activities, ...localActivities].filter(
+          (value, index, self) => self.findIndex((item) => item.id === value.id) === index,
+        );
+        set({ recentActivities: merged, isLoading: false });
+        Storage.setString(KEYS.WORKOUT_HISTORY, JSON.stringify(merged));
         return;
       }
     } catch {
-      // API unavailable
+      // API unavailable, keep local activities
     }
+
     set({ isLoading: false });
+  },
+
+  addManualSteps: (delta: number) => {
+    const state = get();
+    if (!state.isTracking) return;
+    const next = Math.max(0, state.stepsCount + Math.round(delta));
+    set({ stepsCount: next });
+  },
+
+  setManualSteps: (value: number) => {
+    const next = Math.max(0, Math.round(value));
+    set({ stepsCount: next });
   },
 
   setActivityType: (type) => set({ selectedActivityType: type }),
 
-  startWorkout: () => {
+  startWorkout: async () => {
+    // Start the workout state immediately so the UI always transitions to live tracking.
     set({
       isTracking: true,
       isPaused: false,
@@ -78,6 +118,37 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
       caloriesBurned: 0,
       stepsCount: 0,
       gpsPoints: [],
+      useRealSteps: false,
+      startPedometerSteps: 0,
+      workoutStepCallback: undefined,
+    });
+
+    let canUseRealSteps = false;
+    let startPedometerSteps = 0;
+
+    try {
+      canUseRealSteps = await stepCounter.isStepCountingAvailable();
+      if (canUseRealSteps) {
+        startPedometerSteps = await stepCounter.getTodaySteps();
+        const callback = (currentSteps: number) => {
+          const state = get();
+          if (!state.isTracking || state.isPaused) return;
+          const delta = currentSteps - startPedometerSteps;
+          if (delta >= 0) {
+            set({ stepsCount: delta });
+          }
+        };
+        stepCounter.startWatching(callback);
+        set({ workoutStepCallback: callback, useRealSteps: true, startPedometerSteps });
+        return;
+      }
+    } catch {
+      canUseRealSteps = false;
+    }
+
+    set({
+      useRealSteps: canUseRealSteps,
+      startPedometerSteps,
     });
   },
 
@@ -124,7 +195,9 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
       maxSpeedMs: newMaxSpeed,
       averagePaceMinKm: newPace,
       caloriesBurned: newCalories,
-      stepsCount: newSteps,
+      // If device pedometer is available and being used, preserve pedometer-derived steps.
+      // Only use GPS-estimated steps as a fallback when pedometer isn't available.
+      ...(state.useRealSteps ? {} : { stepsCount: newSteps }),
     });
   },
 
@@ -147,6 +220,11 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
     const endTime = new Date().toISOString();
     const typeLabel = state.selectedActivityType.charAt(0) + state.selectedActivityType.slice(1).toLowerCase();
 
+    let finalSteps = state.stepsCount;
+    if (state.workoutStepCallback) {
+      stepCounter.stopWatching(state.workoutStepCallback);
+    }
+
     const workout: WorkoutActivity = {
       id: 'act_' + Date.now(),
       userId: state.userId || '',
@@ -158,7 +236,7 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
       averageSpeed: state.elapsedSeconds > 0 ? parseFloat((state.distanceMeters / state.elapsedSeconds).toFixed(2)) : 0,
       maxSpeed: parseFloat(state.maxSpeedMs.toFixed(2)),
       averagePace: state.averagePaceMinKm,
-      steps: state.stepsCount,
+      steps: finalSteps,
       startTime: state.startTime || endTime,
       endTime,
       gpsPoints: state.gpsPoints,
@@ -199,22 +277,86 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
       // Workout saved locally; will sync when online
     }
 
+    const updatedActivities = [workout, ...state.recentActivities];
+    Storage.setString(KEYS.WORKOUT_HISTORY, JSON.stringify(updatedActivities));
+
     set({
       isTracking: false,
       isPaused: false,
-      recentActivities: [workout, ...state.recentActivities],
+      stepsCount: finalSteps,
+      recentActivities: updatedActivities,
     });
 
     return workout;
   },
 
+  addManualActivity: async (payload: Partial<WorkoutActivity>) => {
+    const state = get();
+    const id = 'act_manual_' + Date.now();
+    const now = new Date().toISOString();
+    const workout: WorkoutActivity = {
+      id,
+      userId: state.userId || '',
+      type: (payload.type as ActivityType) || 'WALKING',
+      title: payload.title || `${((payload.type as ActivityType) || 'WALKING').charAt(0) + ((payload.type as ActivityType) || 'WALKING').slice(1).toLowerCase()} (Manual)` ,
+      distance: Math.round(payload.distance || 0),
+      duration: payload.duration || 0,
+      calories: payload.calories || 0,
+      averageSpeed: payload.averageSpeed || 0,
+      maxSpeed: payload.maxSpeed || 0,
+      averagePace: payload.averagePace || 0,
+      steps: payload.steps || 0,
+      startTime: payload.startTime || now,
+      endTime: payload.endTime || now,
+      gpsPoints: payload.gpsPoints || [],
+    };
+
+    const updated = [workout, ...state.recentActivities];
+    Storage.setString(KEYS.WORKOUT_HISTORY, JSON.stringify(updated));
+    set({ recentActivities: updated });
+
+    // best-effort push to server
+    try {
+      await api.createActivity(workout);
+    } catch {
+      // will be synced later via OfflineBuffer
+      OfflineBuffer.saveWorkoutLocally(workout);
+    }
+
+    return workout;
+  },
+
+  deleteActivity: async (id: string) => {
+    const state = get();
+    const remaining = state.recentActivities.filter((a) => a.id !== id);
+    Storage.setString(KEYS.WORKOUT_HISTORY, JSON.stringify(remaining));
+    set({ recentActivities: remaining });
+
+    // best-effort delete on server
+    try {
+      if ((api as any).deleteActivity) {
+        await (api as any).deleteActivity(id);
+      }
+    } catch {
+      // ignore
+    }
+  },
+
   discardWorkout: () => {
+    const state = get();
+    if (state.workoutStepCallback) {
+      stepCounter.stopWatching(state.workoutStepCallback);
+    }
     set({
       isTracking: false,
       isPaused: false,
       gpsPoints: [],
       elapsedSeconds: 0,
       distanceMeters: 0,
+      stepsCount: 0,
+      useRealSteps: false,
+      startPedometerSteps: 0,
+      workoutStepCallback: undefined,
     });
   },
 }));

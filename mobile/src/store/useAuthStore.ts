@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { UserProfile } from '../types';
 import { api } from '../services/api';
+import { Storage, KEYS } from '../services/Storage';
 
 interface AuthState {
   user: UserProfile | null;
@@ -15,7 +16,16 @@ interface AuthState {
   hydrateFromApi: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+function getOrCreateDeviceId(): string {
+  let id = Storage.getString(KEYS.DEVICE_ID);
+  if (!id) {
+    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    Storage.setString(KEYS.DEVICE_ID, id);
+  }
+  return id;
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   accessToken: null,
   refreshToken: null,
@@ -37,6 +47,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         unitSystem: res.user.unitSystem || 'METRIC',
         theme: res.user.theme || 'DARK',
       };
+
+      if (res.accessToken) Storage.setString(KEYS.ACCESS_TOKEN, res.accessToken);
+      if (res.refreshToken) Storage.setString(KEYS.REFRESH_TOKEN, res.refreshToken);
+      Storage.setString(KEYS.USER, JSON.stringify(user));
+      getOrCreateDeviceId();
+
       set({
         user,
         accessToken: res.accessToken,
@@ -66,6 +82,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         unitSystem: res.user.unitSystem || 'METRIC',
         theme: res.user.theme || 'DARK',
       };
+
+      if (res.accessToken) Storage.setString(KEYS.ACCESS_TOKEN, res.accessToken);
+      if (res.refreshToken) Storage.setString(KEYS.REFRESH_TOKEN, res.refreshToken);
+      Storage.setString(KEYS.USER, JSON.stringify(user));
+      getOrCreateDeviceId();
+
       set({
         user,
         accessToken: res.accessToken,
@@ -81,6 +103,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
+    Storage.remove(KEYS.ACCESS_TOKEN);
+    Storage.remove(KEYS.REFRESH_TOKEN);
+    Storage.remove(KEYS.USER);
     set({
       user: null,
       accessToken: null,
@@ -92,24 +117,59 @@ export const useAuthStore = create<AuthState>((set) => ({
   updateProfile: async (data) => {
     const state = get();
     const payload = {
-      fullName: data.fullName ?? state.user.fullName,
-      weight: data.weight ?? state.user.weight,
-      height: data.height ?? state.user.height,
-      gender: data.gender ?? state.user.gender,
-      unitSystem: data.unitSystem ?? state.user.unitSystem,
-      theme: data.theme ?? state.user.theme,
+      fullName: data.fullName ?? state.user?.fullName,
+      weight: data.weight ?? state.user?.weight,
+      height: data.height ?? state.user?.height,
+      gender: data.gender ?? state.user?.gender,
+      unitSystem: data.unitSystem ?? state.user?.unitSystem,
+      theme: data.theme ?? state.user?.theme,
     };
 
     try {
       const updatedUser = await api.updateProfile(payload);
-      set({ user: normalizeUser(updatedUser) });
+      Storage.setString(KEYS.USER, JSON.stringify(updatedUser));
+      set({ user: updatedUser });
     } catch {
-      set({ user: { ...state.user, ...data } });
+      const merged = { ...state.user, ...data } as UserProfile;
+      Storage.setString(KEYS.USER, JSON.stringify(merged));
+      set({ user: merged });
     }
   },
 
   hydrateFromApi: async () => {
-    // In a real app, check for stored refresh token and validate session
-    // For now, auth state persists in memory
+    const token = Storage.getString(KEYS.ACCESS_TOKEN);
+    const storedUser = Storage.getString(KEYS.USER);
+    if (token && storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser) as UserProfile;
+        set({ user: parsedUser, accessToken: token, isAuthenticated: true, isLoading: false });
+        // Try to refresh profile from backend
+        try {
+          const updated = await api.getProfile();
+          if (updated) {
+            const merged: UserProfile = {
+              ...parsedUser,
+              ...updated,
+              weight: updated.weight ?? parsedUser.weight,
+              height: updated.height ?? parsedUser.height,
+            };
+            Storage.setString(KEYS.USER, JSON.stringify(merged));
+            set({ user: merged });
+          }
+        } catch {
+          // keep local user if API fails
+        }
+        // Try to link this device with backend (best-effort)
+        try {
+          const deviceId = getOrCreateDeviceId();
+          await api.linkDevice(deviceId).catch(() => {});
+        } catch {
+          // ignore
+        }
+        return;
+      } catch {
+      }
+    }
+    set({ isAuthenticated: false, isLoading: false });
   },
 }));

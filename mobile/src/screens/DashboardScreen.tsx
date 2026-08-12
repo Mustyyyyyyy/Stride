@@ -1,9 +1,7 @@
-﻿/** @jsxRuntime classic */
-/// <reference types="react-native" />
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Svg, Circle } from 'react-native-svg';
-import { Zap, Footprints, Bike, Mountain, MapPin, Flame, Target, Play } from 'lucide-react-native';
+import { Zap, Footprints, Bike, Mountain, MapPin, Flame, Target, Play, Settings } from 'lucide-react-native';
 import { useActivityStore } from '../store/useActivityStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { WorkoutActivity } from '../types';
@@ -47,7 +45,7 @@ const HealthRing: React.FC<{
   );
 };
 
-export const DashboardScreen: React.FC = () => {
+export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSettings?: () => void; onStartActivity?: () => void }> = ({ onOpenOnboarding, onOpenSettings, onStartActivity }) => {
   const { user } = useAuthStore();
   const { recentActivities, hydrateFromApi } = useActivityStore();
   const [isHydrating, setIsHydrating] = useState(true);
@@ -60,6 +58,7 @@ export const DashboardScreen: React.FC = () => {
     const { setActivityType, startWorkout } = useActivityStore.getState();
     setActivityType(type);
     startWorkout();
+    if (onStartActivity) onStartActivity();
   };
 
   if (!user) {
@@ -84,12 +83,13 @@ export const DashboardScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Welcome back,</Text>
-        <Text style={styles.userName}>{user.fullName}</Text>
-        <View style={styles.streakRow}>
-          <Flame size={16} color="#f97316" />
-          <Text style={styles.streak}>7-Day Active Workout Streak</Text>
+        <View>
+          <Text style={styles.greeting}>Welcome back,</Text>
+          <Text style={styles.userName}>{user.fullName}</Text>
         </View>
+        <TouchableOpacity style={styles.settingsButton} onPress={() => onOpenSettings && onOpenSettings()}>
+          <Settings size={22} color="#10b981" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.ringsContainer}>
@@ -136,6 +136,11 @@ export const DashboardScreen: React.FC = () => {
           <Text style={styles.statValue}>{totalSteps.toLocaleString()}</Text>
           <Text style={styles.statLabel}>steps</Text>
         </View>
+        <View style={styles.statCard}>
+          <MapPin size={20} color="#a855f7" />
+          <Text style={styles.statValue}>{recentActivities.length}</Text>
+          <Text style={styles.statLabel}>workouts</Text>
+        </View>
       </View>
 
       <View style={styles.recentSection}>
@@ -149,22 +154,21 @@ export const DashboardScreen: React.FC = () => {
             <Text style={styles.emptyCardText}>No workouts yet. Start your first activity above!</Text>
           </View>
         ) : (
-          recentActivities.slice(0, 5).map((act: WorkoutActivity) => (
+          recentActivities.slice(0, 5).map((act) => (
             <View key={act.id} style={styles.workoutCard}>
               <View style={styles.workoutIconBox}>
-                {ACTIVITY_ICONS[act.type as ActivityType] || <Zap size={20} color="#10b981" />}
+                {ACTIVITY_ICONS[act.type as ActivityType] || <Activity size={20} color="#64748b" />}
               </View>
               <View style={styles.workoutInfo}>
                 <Text style={styles.workoutTitle}>{act.title}</Text>
-                <View style={styles.workoutMetaRow}>
-                  <MapPin size={12} color="#64748b" />
-                  <Text style={styles.workoutMeta}>
-                    {(act.distance / 1000).toFixed(2)} km • {Math.round(act.duration / 60)} mins
-                    {act.startLocation ? ` • ${act.startLocation}` : ''}
-                  </Text>
-                </View>
+                <Text style={styles.workoutMeta}>
+                  {new Date(act.startTime).toLocaleDateString()} • {(act.distance / 1000).toFixed(2)} km
+                </Text>
               </View>
-              <Text style={styles.workoutCalories}>{act.calories} kcal</Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.workoutCalories}>{act.calories} kcal</Text>
+                <Text style={styles.workoutMeta}>{Math.round(act.duration / 60)} min</Text>
+              </View>
             </View>
           ))
         )}
@@ -175,19 +179,18 @@ export const DashboardScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#090d16', padding: 16 },
-  header: { marginBottom: 20 },
-  greeting: { color: '#94a3b8', fontSize: 14 },
-  userName: { color: '#ffffff', fontSize: 24, fontWeight: '800', marginTop: 2 },
-  streakRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
-  streak: { color: '#f97316', fontSize: 13, fontWeight: '600' },
-  ringsContainer: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 16, marginBottom: 16 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  greeting: { color: '#94a3b8', fontSize: 14, fontWeight: '600' },
+  userName: { color: '#ffffff', fontSize: 24, fontWeight: '900' },
+  settingsButton: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#0f172a', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1e293b' },
+  ringsContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 24, paddingVertical: 16 },
   quickStartContainer: { marginBottom: 24 },
-  sectionTitle: { color: '#ffffff', fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
-  actButton: { flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center', marginHorizontal: 3, flexDirection: 'row', justifyContent: 'center', gap: 6 },
-  actButtonText: { color: '#090d16', fontWeight: '700', fontSize: 13 },
-  statsGrid: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  statCard: { flex: 1, backgroundColor: '#111827', borderRadius: 16, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1f2937' },
+  sectionTitle: { color: '#ffffff', fontSize: 18, fontWeight: '800', marginBottom: 12 },
+  buttonRow: { flexDirection: 'row', gap: 10 },
+  actButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14, borderRadius: 14 },
+  actButtonText: { color: '#090d16', fontWeight: '800', fontSize: 13 },
+  statsGrid: { flexDirection: 'row', gap: 10, marginBottom: 24 },
+  statCard: { flex: 1, backgroundColor: '#111827', borderRadius: 16, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1f2937' },
   statValue: { color: '#ffffff', fontSize: 20, fontWeight: '900', marginTop: 8 },
   statLabel: { color: '#64748b', fontSize: 11, fontWeight: '600', textTransform: 'uppercase', marginTop: 2 },
   recentSection: { marginBottom: 24 },
@@ -195,8 +198,7 @@ const styles = StyleSheet.create({
   workoutIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', alignItems: 'center', justifyContent: 'center' },
   workoutInfo: { flex: 1 },
   workoutTitle: { color: '#ffffff', fontWeight: '700', fontSize: 14 },
-  workoutMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  workoutMeta: { color: '#94a3b8', fontSize: 12 },
+  workoutMeta: { color: '#94a3b8', fontSize: 12, marginTop: 3 },
   workoutCalories: { color: '#f97316', fontWeight: '700', fontSize: 13 },
   emptyCard: { backgroundColor: '#111827', borderRadius: 14, padding: 24, borderWidth: 1, borderColor: '#1f2937', alignItems: 'center' },
   emptyCardText: { color: '#64748b', fontSize: 13, textAlign: 'center' },
@@ -204,3 +206,5 @@ const styles = StyleSheet.create({
   emptyTitle: { color: '#ffffff', fontSize: 20, fontWeight: '700', marginBottom: 8 },
   emptySub: { color: '#64748b', fontSize: 14, textAlign: 'center' },
 });
+
+import { Activity } from 'lucide-react-native';

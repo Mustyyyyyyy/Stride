@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { StatsService, StatsController } from './stats.service';
+import { StatsService } from './stats.service';
+import { StatsController } from './stats.controller';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({

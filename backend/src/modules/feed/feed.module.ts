@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { FeedService, FeedController } from './feed.service';
+import { FeedService } from './feed.service';
+import { FeedController } from './feed.controller';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({

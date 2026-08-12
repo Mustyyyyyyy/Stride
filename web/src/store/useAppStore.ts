@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { ActivityType, GpsPoint, WorkoutActivity, UserProfile, FitnessGoal, Achievement } from '../types';
 import { api } from '../services/api';
+import { estimateSteps } from '../services/StepEstimator';
 
 export type PageView = 'dashboard' | 'live-activity' | 'history' | 'workout-detail' | 'stats' | 'goals' | 'profile' | 'notifications' | 'feed' | 'challenges';
 
@@ -203,12 +204,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ isLoading: true, apiError: null });
     try {
       // Use allSettled so a single 404 endpoint doesn't block everything
-      const [profileRes, activitiesRes, goalsRes, achievementsRes, unreadRes] = await Promise.allSettled([
+      const [profileRes, activitiesRes, goalsRes, achievementsRes, unreadRes, feedRes, challengesRes] = await Promise.allSettled([
         api.getProfile(),
         api.getActivities(),
         api.getGoals(),
         api.getAchievements(),
         api.getUnreadCount().catch(() => 0), // optional endpoint, fallback 0
+        api.getFeed().catch(() => []), // optional endpoint, fallback []
+        api.getChallenges().catch(() => []), // optional endpoint, fallback []
       ]);
 
       // Check if any request failed with 401 Unauthorized (expired token)
@@ -228,10 +231,18 @@ export const useAppStore = create<AppState>((set, get) => ({
         return;
       }
 
-      const activities = activitiesRes.status === 'fulfilled' && Array.isArray(activitiesRes.value) ? activitiesRes.value : [];
+      let activities = activitiesRes.status === 'fulfilled' && Array.isArray(activitiesRes.value) ? activitiesRes.value : [];
       const goals = goalsRes.status === 'fulfilled' && Array.isArray(goalsRes.value) ? goalsRes.value : [];
       const achievements = achievementsRes.status === 'fulfilled' && Array.isArray(achievementsRes.value) ? achievementsRes.value : [];
       const unread = unreadRes.status === 'fulfilled' && typeof unreadRes.value === 'number' ? unreadRes.value : 0;
+      const feed = feedRes.status === 'fulfilled' && Array.isArray(feedRes.value) ? feedRes.value : [];
+      const challenges = challengesRes.status === 'fulfilled' && Array.isArray(challengesRes.value) ? challengesRes.value : [];
+
+      // Ensure activities have sensible step values on web when the backend or source didn't provide them.
+      activities = activities.map((a: WorkoutActivity) => ({
+        ...a,
+        steps: typeof a.steps === 'number' && a.steps > 0 ? a.steps : estimateSteps(a.type as ActivityType, a.distance || 0),
+      }));
 
       set({
         user: normalizeUser(profileRes.value),
@@ -240,6 +251,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         achievements,
         streakDays: computeStreakDays(activities),
         unreadNotificationsCount: unread,
+        feedItems: feed,
         isAuthenticated: true,
         isLoading: false,
         apiError: null,
@@ -349,7 +361,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const nextPace = distKm > 0 ? parseFloat((durationMins / distKm).toFixed(2)) : 0;
     const met = state.selectedActivityType === 'RUNNING' ? 9.8 : state.selectedActivityType === 'CYCLING' ? 7.5 : 3.8;
     const nextCalories = Math.round(met * (state.user.weight || 70) * (nextSecs / 3600));
-    const nextSteps = state.selectedActivityType === 'CYCLING' ? 0 : Math.round(nextDist * 1.315);
+    const nextSteps = estimateSteps(state.selectedActivityType, nextDist);
 
     set({
       elapsedSeconds: nextSecs,

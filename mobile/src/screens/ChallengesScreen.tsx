@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Trophy, Users, Flame, CheckCircle2, Lock, Zap } from 'lucide-react-native';
+import { api } from '../services/api';
 
 interface Challenge {
   id: string;
@@ -31,11 +32,7 @@ export const ChallengesScreen: React.FC = () => {
   const loadChallenges = async () => {
     setIsLoading(true);
     try {
-      const data = await fetch('http://localhost:3004/api/challenges', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('stride_access_token')}`,
-        },
-      }).then((res) => res.json());
+      const data = await api.getChallenges();
       setChallenges(Array.isArray(data) ? data : []);
     } catch {
       setChallenges([]);

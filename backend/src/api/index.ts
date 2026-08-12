@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 
@@ -26,6 +26,18 @@ export const bootstrapServer = async () => {
 };
 
 export default async function handler(req: any, res: any) {
-  const server = await bootstrapServer();
-  server(req, res);
+  try {
+    const server = await bootstrapServer();
+    await new Promise<void>((resolve, reject) => {
+      server(req, res);
+      res.on('finish', resolve);
+      res.on('error', reject);
+    });
+  } catch (err) {
+    console.error('Vercel serverless error:', err);
+    if (!res.headersSent) {
+      res.statusCode = 500;
+      res.end('Internal Server Error');
+    }
+  }
 }

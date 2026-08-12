@@ -1,4 +1,5 @@
 {
   "name": "stride-mobile",
-  "displayName": "Stride"
+  "displayName": "Stride",
+  "scheme": "stride"
 }

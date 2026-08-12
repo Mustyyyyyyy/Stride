@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { GoalsService, GoalsController } from './goals.service';
+import { GoalsService } from './goals.service';
+import { GoalsController } from './goals.controller';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({

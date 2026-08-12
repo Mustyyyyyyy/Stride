@@ -1,45 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Controller, Get, Patch, Body, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber } from 'class-validator';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PrismaService } from '../../prisma/prisma.service';
-
-export class UpdateProfileDto {
-  @ApiPropertyOptional({ example: 'Alex Morgan' })
-  @IsOptional()
-  @IsString()
-  fullName?: string;
-
-  @ApiPropertyOptional({ example: 70 })
-  @IsOptional()
-  @IsNumber()
-  weight?: number;
-
-  @ApiPropertyOptional({ example: 175 })
-  @IsOptional()
-  @IsNumber()
-  height?: number;
-
-  @ApiPropertyOptional({ example: 'MALE' })
-  @IsOptional()
-  @IsString()
-  gender?: string;
-
-  @ApiPropertyOptional({ example: '1995-05-15' })
-  @IsOptional()
-  dateOfBirth?: any;
-
-  @ApiPropertyOptional({ example: 'METRIC' })
-  @IsOptional()
-  @IsString()
-  unitSystem?: string;
-
-  @ApiPropertyOptional({ example: 'DARK' })
-  @IsOptional()
-  @IsString()
-  theme?: string;
-}
 
 const DEFAULT_USER_PROFILE = {
   id: 'usr_demo_101',
@@ -72,7 +32,7 @@ export class UsersService {
     }
   }
 
-  async updateProfile(userId: string, data: UpdateProfileDto) {
+  async updateProfile(userId: string, data: any) {
     try {
       const updateData: any = {};
       if (data.fullName !== undefined) updateData.fullName = data.fullName;
@@ -98,25 +58,5 @@ export class UsersService {
     } catch (e) {
       return { ...DEFAULT_USER_PROFILE, id: userId, ...data };
     }
-  }
-}
-
-@ApiTags('Users & Profile')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
-@Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-
-  @ApiOperation({ summary: 'Get current user profile & settings' })
-  @Get('profile')
-  async getProfile(@Request() req: any) {
-    return this.usersService.getProfile(req.user?.id || req.user?.sub);
-  }
-
-  @ApiOperation({ summary: 'Update user profile (height, weight, units, theme)' })
-  @Patch('profile')
-  async updateProfile(@Request() req: any, @Body() dto: UpdateProfileDto) {
-    return this.usersService.updateProfile(req.user?.id || req.user?.sub, dto);
   }
 }

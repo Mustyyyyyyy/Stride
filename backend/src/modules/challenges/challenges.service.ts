@@ -1,6 +1,4 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -146,21 +144,5 @@ export class ChallengesService {
     } catch {
       return [];
     }
-  }
-}
-
-@ApiTags('Challenges')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
-@Controller('challenges')
-export class ChallengesController {
-  constructor(private readonly challengesService: ChallengesService) {}
-
-  @ApiOperation({ summary: 'Get all active challenges with user progress' })
-  @Get()
-  async getChallenges(@Request() req: any) {
-    const userId = req.user?.id || req.user?.sub;
-    if (!userId) throw new UnauthorizedException('User not authenticated');
-    return this.challengesService.getChallenges(userId);
   }
 }
