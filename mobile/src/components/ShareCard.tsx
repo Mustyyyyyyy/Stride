@@ -102,7 +102,7 @@ export const ShareCard: React.FC<Props> = ({ workout, userName }) => {
           <Text style={styles.userInitial}>{(userName || 'U').charAt(0).toUpperCase()}</Text>
           <Text style={styles.userNameText}>{userName || 'Stride User'}</Text>
         </View>
-        <Text style={styles.footerUrl}>https://stride-six-sepia.vercel.app/</Text>
+        <Text style={styles.footerUrl}>https://stride-phi-one.vercel.app/</Text>
       </View>
     </View>
   );

@@ -1,7 +1,7 @@
 ﻿import { useAuthStore } from '../store/useAuthStore';
 import { Storage, KEYS } from './Storage';
 
-const API_BASE = 'https://stride-six-sepia.vercel.app/api';
+const API_BASE = 'https://stride-phi-one.vercel.app/api';
 
 async function refreshTokensIfNeeded(): Promise<boolean> {
   const refreshToken = Storage.getString(KEYS.REFRESH_TOKEN);

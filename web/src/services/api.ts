@@ -1,4 +1,4 @@
-﻿const API_BASE = (import.meta as any).env?.VITE_API_URL || 'https://stride-six-sepia.vercel.app/api';
+﻿const API_BASE = (import.meta as any).env?.VITE_API_URL || 'https://stride-phi-one.vercel.app/api';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const url = API_BASE + path;

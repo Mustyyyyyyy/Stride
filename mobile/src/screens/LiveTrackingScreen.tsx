@@ -84,7 +84,7 @@ export const LiveTrackingScreen: React.FC<{ onWorkoutComplete?: () => void }> = 
       `📍 ${workout.gpsPoints?.length || 0} GPS points`,
       ``,
       `Proudly tracked with Stride`,
-      `https://stride-six-sepia.vercel.app/`,
+      `https://stride-phi-one.vercel.app/`,
     ].join('\n');
     await Share.share({ message: msg, title: 'My Stride workout' } as any);
   };

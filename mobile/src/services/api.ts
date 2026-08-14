@@ -5,7 +5,7 @@ const API_BASE = (() => {
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     return 'http://localhost:3004/api';
   }
-  return 'https://stride-six-sepia.vercel.app/api';
+  return 'https://stride-phi-one.vercel.app/api';
 })();
 
 async function refreshTokensIfNeeded(): Promise<boolean> {

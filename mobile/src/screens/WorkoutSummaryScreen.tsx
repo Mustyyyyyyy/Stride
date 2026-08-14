@@ -161,7 +161,7 @@ export const WorkoutSummaryScreen: React.FC<{
       `📍 ${gpsPointsCount} GPS points`,
       ``,
       `Proudly tracked with Stride`,
-      `https://stride-six-sepia.vercel.app/`,
+      `https://stride-phi-one.vercel.app/`,
     ].join('\n');
     await Share.share({ message: msg, title: 'My Stride workout' } as any);
   };
@@ -402,7 +402,7 @@ export const WorkoutSummaryScreen: React.FC<{
                   </View>
                   <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '700' }}>{user?.fullName || 'Stride User'}</Text>
                 </View>
-                <Text style={{ color: '#64748b', fontSize: 11, fontWeight: '600' }}>https://stride-six-sepia.vercel.app/</Text>
+                <Text style={{ color: '#64748b', fontSize: 11, fontWeight: '600' }}>https://stride-phi-one.vercel.app/</Text>
               </View>
             </View>
           </ViewShot>
