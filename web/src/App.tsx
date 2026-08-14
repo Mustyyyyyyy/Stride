@@ -11,10 +11,14 @@ import { ProfileSettings } from './pages/ProfileSettings';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { FeedPage } from './pages/FeedPage';
 import { ChallengesPage } from './pages/ChallengesPage';
-import { AnimeSplashScreen } from './components/AnimeSplashScreen';
+import { WorkoutSummary } from './pages/WorkoutSummary';
+import { SettingsScreen } from './pages/SettingsScreen';
+import { OnboardingScreen } from './components/OnboardingScreen';
 import { AuthPage } from './pages/AuthPage';
 import { WifiOff } from 'lucide-react';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
+import { BottomNavBar } from './components/BottomNavBar';
+import { webBackgroundStepService } from './services/WebBackgroundStepService';
 
 export const App: React.FC = () => {
   // ─── ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT TOP ─────────────────────
@@ -22,21 +26,45 @@ export const App: React.FC = () => {
   const activePage = useAppStore((s) => s.activePage);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const isOnline = useAppStore((s) => s.isOnline);
+  const setActivePage = useAppStore((s) => s.setActivePage);
 
-  const [showSplash, setShowSplash] = useState<boolean>(true);
   const [hydrated, setHydrated] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    // Check if user has seen onboarding before
+    const hasSeenOnboarding = localStorage.getItem('stride_onboarding_completed');
+    if (!hasSeenOnboarding && isAuthenticated) {
+      setShowOnboarding(true);
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     // Only run hydration once on mount — hydrateFromApi guards against no-token itself
     hydrateFromApi().finally(() => setHydrated(true));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 1. Show anime splash on every app open (5 seconds)
-  if (showSplash) {
-    return <AnimeSplashScreen onComplete={() => setShowSplash(false)} />;
+  // Initialize web background step service
+  useEffect(() => {
+    if (isAuthenticated) {
+      webBackgroundStepService.start().catch(() => {
+        // Silently fail if step counter is not available
+      });
+    }
+    return () => {
+      webBackgroundStepService.stop();
+    };
+  }, [isAuthenticated]);
+
+  // Show onboarding for first-time users
+  if (showOnboarding) {
+    return <OnboardingScreen onFinish={() => {
+      localStorage.setItem('stride_onboarding_completed', 'true');
+      setShowOnboarding(false);
+    }} />;
   }
 
-  // 2. Wait for initial hydration check
+  // Wait for initial hydration check
   if (!hydrated) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -50,12 +78,15 @@ export const App: React.FC = () => {
     );
   }
 
-  // 3. If not authenticated, show full-featured auth page
+  // If not authenticated, show full-featured auth page
   if (!isAuthenticated) {
-    return <AuthPage onAuthenticated={() => hydrateFromApi()} />;
+    return <AuthPage onAuthenticated={() => {
+      hydrateFromApi();
+      setActivePage('dashboard');
+    }} />;
   }
 
-  // 4. Main app for authenticated users
+  // Main app for authenticated users
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans">
       <Header />
@@ -72,17 +103,22 @@ export const App: React.FC = () => {
 
       {/* Page content — extra bottom padding on mobile for the bottom nav */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-24 md:pb-8">
-        {activePage === 'dashboard'      && <Dashboard />}
-        {activePage === 'live-activity'  && <LiveActivity />}
-        {activePage === 'history'        && <History />}
-        {activePage === 'workout-detail' && <WorkoutDetail />}
-        {activePage === 'stats'          && <Stats />}
-        {activePage === 'goals'          && <GoalsAchievements />}
-        {activePage === 'profile'        && <ProfileSettings />}
-        {activePage === 'notifications'  && <NotificationsPage />}
-        {activePage === 'feed'           && <FeedPage />}
-        {activePage === 'challenges'     && <ChallengesPage />}
+        {activePage === 'dashboard'        && <Dashboard />}
+        {activePage === 'live-activity'    && <LiveActivity />}
+        {activePage === 'history'          && <History />}
+        {activePage === 'workout-detail'   && <WorkoutDetail />}
+        {activePage === 'workout-summary'  && <WorkoutSummary />}
+        {activePage === 'stats'            && <Stats />}
+        {activePage === 'goals'            && <GoalsAchievements />}
+        {activePage === 'profile'          && <ProfileSettings />}
+        {activePage === 'settings'         && <SettingsScreen />}
+        {activePage === 'notifications'    && <NotificationsPage />}
+        {activePage === 'feed'             && <FeedPage />}
+        {activePage === 'challenges'       && <ChallengesPage />}
       </main>
+
+      {/* Mobile bottom navigation - hidden on desktop */}
+      <BottomNavBar />
 
       <PWAInstallBanner />
     </div>

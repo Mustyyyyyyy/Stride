@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { User, Settings, Scale, Ruler, Shield, Bell, Moon, Sun, Globe, LogOut, Save, CheckCircle2 } from 'lucide-react';
+import { User, Settings, Scale, Ruler, Shield, Bell, Moon, Sun, Globe, LogOut, Save, CheckCircle2, ChevronRight } from 'lucide-react';
 
 export const ProfileSettings: React.FC = () => {
-  const { user, updateUser, unitSystem, setUnitSystem, theme, toggleTheme } = useAppStore();
+  const { user, updateUser, unitSystem, setUnitSystem, theme, toggleTheme, setActivePage } = useAppStore();
 
   const [fullName, setFullName] = useState(user.fullName);
   const [weight, setWeight] = useState(user.weight || 70);
@@ -50,6 +50,23 @@ export const ProfileSettings: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Quick Link to Settings */}
+      <button
+        onClick={() => setActivePage('settings')}
+        className="w-full glass-card p-4 flex items-center justify-between hover:border-slate-700 transition-all"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+            <Settings className="w-5 h-5 text-cyan-400" />
+          </div>
+          <div className="text-left">
+            <h3 className="text-sm font-bold text-white">App Settings</h3>
+            <p className="text-xs text-slate-400">Tracking, manual entry, data export, sync</p>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-slate-600" />
+      </button>
 
       {/* Body Metrics Form */}
       <form onSubmit={handleSave} className="glass-card p-6 space-y-6">

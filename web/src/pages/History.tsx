@@ -104,7 +104,7 @@ export const History: React.FC = () => {
           return (
             <div
               key={act.id}
-              onClick={() => setActivePage('workout-detail', act.id)}
+              onClick={() => setActivePage('workout-summary', act.id)}
               className="glass-card p-5 space-y-4 cursor-pointer hover:border-emerald-500/40 transition-all group"
             >
               <div className="flex items-start justify-between">

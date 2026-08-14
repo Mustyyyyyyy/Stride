@@ -2,8 +2,9 @@ import { create } from 'zustand';
 import { ActivityType, GpsPoint, WorkoutActivity, UserProfile, FitnessGoal, Achievement } from '../types';
 import { api } from '../services/api';
 import { estimateSteps } from '../services/StepEstimator';
+import { webBackgroundStepService } from '../services/WebBackgroundStepService';
 
-export type PageView = 'dashboard' | 'live-activity' | 'history' | 'workout-detail' | 'stats' | 'goals' | 'profile' | 'notifications' | 'feed' | 'challenges';
+export type PageView = 'dashboard' | 'live-activity' | 'history' | 'workout-detail' | 'workout-summary' | 'stats' | 'goals' | 'profile' | 'settings' | 'notifications' | 'feed' | 'challenges';
 
 export type NotificationType = 'activity' | 'achievement' | 'goal' | 'reminder' | 'system';
 
@@ -407,10 +408,18 @@ export const useAppStore = create<AppState>((set, get) => ({
         isTracking: false,
         isPaused: false,
         activities: [persistedWorkout, ...state.activities],
-        activePage: 'workout-detail',
+        activePage: 'workout-summary',
         selectedWorkoutId: persistedWorkout.id,
         streakDays: computeStreakDays([persistedWorkout, ...state.activities]),
       });
+
+      // Sync steps with web background step service
+      try {
+        await webBackgroundStepService.syncWithActivity(state.selectedActivityType, state.distanceMeters);
+      } catch {
+        // ignore step sync errors
+      }
+
       return persistedWorkout;
     } catch (err) {
       set({ apiError: err instanceof Error ? err.message : 'Unable to save workout.' });
@@ -418,10 +427,18 @@ export const useAppStore = create<AppState>((set, get) => ({
         isTracking: false,
         isPaused: false,
         activities: [newWorkout, ...state.activities],
-        activePage: 'workout-detail',
+        activePage: 'workout-summary',
         selectedWorkoutId: newWorkout.id,
         streakDays: computeStreakDays([newWorkout, ...state.activities]),
       });
+
+      // Sync steps even on local-only save
+      try {
+        await webBackgroundStepService.syncWithActivity(state.selectedActivityType, state.distanceMeters);
+      } catch {
+        // ignore step sync errors
+      }
+
       return newWorkout;
     }
   },

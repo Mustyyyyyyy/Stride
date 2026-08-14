@@ -15,6 +15,11 @@ export const ProfileScreen: React.FC = () => {
     updateProfile({ fullName: name, weight: Number(weight), height: Number(height) });
   };
 
+  const toggleTheme = async () => {
+    const newTheme = user?.theme === 'DARK' ? 'LIGHT' : 'DARK';
+    await updateProfile({ theme: newTheme });
+  };
+
   if (!user) {
     return (
       <View style={styles.emptyContainer}>
@@ -82,9 +87,9 @@ export const ProfileScreen: React.FC = () => {
               <Text style={styles.prefLabel}>Theme</Text>
               <Text style={styles.prefValue}>{user.theme === 'DARK' ? 'Dark' : 'Light'}</Text>
             </View>
-            <View style={styles.themeIcon}>
+            <TouchableOpacity onPress={toggleTheme} style={styles.themeIcon}>
               {user.theme === 'DARK' ? <Moon size={20} color="#f59e0b" /> : <Sun size={20} color="#6366f1" />}
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -129,3 +134,4 @@ const styles = StyleSheet.create({
   emptyContainer: { flex: 1, backgroundColor: '#090d16', alignItems: 'center', justifyContent: 'center', padding: 24 },
   emptyTitle: { color: '#ffffff', fontSize: 18, fontWeight: '700' },
 });
+

@@ -3,7 +3,7 @@ import { useAppStore } from '../store/useAppStore';
 import { MapTracker } from '../components/MapTracker';
 import { GpxExporter } from '../services/GpxExporter';
 import { TelemetryAnalyzer } from '../services/TelemetryAnalyzer';
-import { ArrowLeft, Download, Calendar, Timer, Flame, Footprints, Activity, Mountain, Heart, CloudSun } from 'lucide-react';
+import { ArrowLeft, Download, Calendar, Timer, Flame, Footprints, Activity, Mountain, Heart, CloudSun, Share2 } from 'lucide-react';
 
 export const WorkoutDetail: React.FC = () => {
   const { activities, selectedWorkoutId, setActivePage, unitSystem } = useAppStore();
@@ -71,6 +71,15 @@ export const WorkoutDetail: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setActivePage('workout-summary', workout.id)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all"
+            title="View shareable workout summary"
+          >
+            <Share2 className="w-4 h-4" />
+            <span>Share Summary</span>
+          </button>
+
           {/* GPX Track Export Button */}
           <button
             onClick={handleExportGpx}

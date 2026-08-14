@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { MetricCard } from '../components/MetricCard';
 import { ActivityType } from '../types';
+import { webBackgroundStepService } from '../services/WebBackgroundStepService';
 import {
   Footprints, Navigation, Flame, Timer, ChevronRight,
   Zap, Bike, Mountain, ArrowRight, TrendingUp, Activity,
@@ -47,10 +48,11 @@ const activityIcon = (type: ActivityType) => {
 
 export const Dashboard: React.FC = () => {
   const { user, activities, setActivePage, unitSystem, streakDays } = useAppStore();
+  const [dailySteps, setDailySteps] = useState(0);
 
   const totalDistanceMeters = activities.reduce((a, x) => a + x.distance, 0);
   const totalCalories = activities.reduce((a, x) => a + x.calories, 0);
-  const totalSteps = activities.reduce((a, x) => a + x.steps, 0);
+  const totalSteps = dailySteps > 0 ? dailySteps : activities.reduce((a, x) => a + x.steps, 0);
   const totalDurationSecs = activities.reduce((a, x) => a + x.duration, 0);
 
   const distKm = (totalDistanceMeters / 1000).toFixed(1);
@@ -62,6 +64,35 @@ export const Dashboard: React.FC = () => {
   const moveTarget = 500;
   const exerciseTarget = 60;
   const standTarget = 10000;
+
+  // Load daily steps from web background step service
+  useEffect(() => {
+    let mounted = true;
+
+    const loadSteps = async () => {
+      try {
+        const steps = await webBackgroundStepService.getDailySteps();
+        if (mounted) {
+          setDailySteps(steps);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    loadSteps();
+
+    const unsubscribe = webBackgroundStepService.addListener((steps) => {
+      if (mounted) {
+        setDailySteps(steps);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="space-y-6 animate-fadeIn">

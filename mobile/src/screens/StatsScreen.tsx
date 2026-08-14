@@ -1,12 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useActivityStore } from '../store/useActivityStore';
 import { useGoalStore } from '../store/useGoalStore';
-import { Navigation, Flame, Footprints, Timer, TrendingUp, Target } from 'lucide-react-native';
+import { Navigation, Flame, Footprints, Timer, TrendingUp, Target, Activity } from 'lucide-react-native';
+
+type Period = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export const StatsScreen: React.FC = () => {
   const { recentActivities } = useActivityStore();
   const { goals } = useGoalStore();
+  const [period, setPeriod] = useState<Period>('weekly');
 
   const stats = useMemo(() => {
     const totalDist = recentActivities.reduce((acc, a) => acc + a.distance, 0) / 1000;
@@ -15,8 +18,63 @@ export const StatsScreen: React.FC = () => {
     const totalDur = recentActivities.reduce((acc, a) => acc + a.duration, 0);
     const avgSpeed = totalDur > 0 ? totalDist / (totalDur / 3600) : 0;
     const avgPace = totalDist > 0 ? (totalDur / 60) / totalDist : 0;
-    return { totalDist, totalSteps, totalCals, totalDur, avgSpeed, avgPace };
+    const avgCalPerActivity = recentActivities.length > 0 ? Math.round(totalCals / recentActivities.length) : 0;
+    return { totalDist, totalSteps, totalCals, totalDur, avgSpeed, avgPace, avgCalPerActivity };
   }, [recentActivities]);
+
+  const periodData = useMemo(() => {
+    const now = new Date();
+    const labels: string[] = [];
+    const dists: number[] = [];
+    const steps: number[] = [];
+    const cals: number[] = [];
+
+    if (period === 'weekly') {
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const dayEnd = new Date(dayStart.getTime() + 86400000);
+        const dayActivities = recentActivities.filter((a) => new Date(a.startTime) >= dayStart && new Date(a.startTime) < dayEnd);
+        labels.push(d.toLocaleDateString(undefined, { weekday: 'short' }));
+        dists.push(parseFloat((dayActivities.reduce((acc, a) => acc + a.distance, 0) / 1000).toFixed(1)));
+        steps.push(dayActivities.reduce((acc, a) => acc + a.steps, 0));
+        cals.push(Math.round(dayActivities.reduce((acc, a) => acc + a.calories, 0)));
+      }
+    } else if (period === 'monthly') {
+      for (let i = 3; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+        const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+        const monthActivities = recentActivities.filter((a) => new Date(a.startTime) >= monthStart && new Date(a.startTime) < monthEnd);
+        labels.push(d.toLocaleDateString(undefined, { month: 'short' }));
+        dists.push(parseFloat((monthActivities.reduce((acc, a) => acc + a.distance, 0) / 1000).toFixed(1)));
+        steps.push(monthActivities.reduce((acc, a) => acc + a.steps, 0));
+        cals.push(Math.round(monthActivities.reduce((acc, a) => acc + a.calories, 0)));
+      }
+    } else if (period === 'yearly') {
+      for (let i = 3; i >= 0; i--) {
+        const y = now.getFullYear() - i;
+        const yearActivities = recentActivities.filter((a) => new Date(a.startTime).getFullYear() === y);
+        labels.push(String(y));
+        dists.push(parseFloat((yearActivities.reduce((acc, a) => acc + a.distance, 0) / 1000).toFixed(1)));
+        steps.push(yearActivities.reduce((acc, a) => acc + a.steps, 0));
+        cals.push(Math.round(yearActivities.reduce((acc, a) => acc + a.calories, 0)));
+      }
+    } else {
+      const hours = ['6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM'];
+      for (let i = 0; i < hours.length; i++) {
+        labels.push(hours[i]);
+        dists.push(0);
+        steps.push(0);
+        cals.push(0);
+      }
+    }
+
+    return { labels, dists, steps, cals };
+  }, [recentActivities, period]);
+
+  const maxDist = Math.max(...periodData.dists, 1);
 
   if (recentActivities.length === 0) {
     return (
@@ -33,6 +91,42 @@ export const StatsScreen: React.FC = () => {
       <Text style={styles.title}>Fitness Analytics</Text>
       <Text style={styles.subtitle}>Performance breakdown</Text>
 
+      {/* Period Selector */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.periodRow}>
+        {([
+          { id: 'daily', label: 'Daily' },
+          { id: 'weekly', label: 'Weekly' },
+          { id: 'monthly', label: 'Monthly' },
+          { id: 'yearly', label: 'Yearly' },
+        ] as { id: Period; label: string }[]).map((p) => (
+          <TouchableOpacity
+            key={p.id}
+            onPress={() => setPeriod(p.id)}
+            style={[styles.periodChip, period === p.id && styles.periodChipActive]}
+          >
+            <Text style={[styles.periodText, period === p.id && styles.periodTextActive]}>{p.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Distance Chart */}
+      <View style={styles.chartCard}>
+        <Text style={styles.chartTitle}>Distance Trend</Text>
+        <View style={styles.chartArea}>
+          {periodData.dists.map((dist, idx) => {
+            const heightPercent = (dist / maxDist) * 100;
+            return (
+              <View key={idx} style={styles.chartBarWrapper}>
+                <Text style={styles.chartBarValue}>{dist} km</Text>
+                <View style={[styles.chartBar, { height: `${Math.max(4, heightPercent)}%` }]} />
+                <Text style={styles.chartBarLabel}>{periodData.labels[idx]}</Text>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* Primary Stats */}
       <View style={styles.grid}>
         <View style={styles.statCard}>
           <Navigation size={20} color="#10b981" />
@@ -66,6 +160,7 @@ export const StatsScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* Secondary Stats */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Active Goals Progress</Text>
         {goals.slice(0, 3).map((g) => {
@@ -92,6 +187,18 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#090d16', padding: 16 },
   title: { color: '#ffffff', fontSize: 28, fontWeight: '800' },
   subtitle: { color: '#94a3b8', fontSize: 13, marginBottom: 16 },
+  periodRow: { marginBottom: 16 },
+  periodChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: '#111827', borderWidth: 1, borderColor: '#1f2937', marginRight: 8 },
+  periodChipActive: { backgroundColor: '#10b981', borderColor: '#10b981' },
+  periodText: { color: '#94a3b8', fontSize: 12, fontWeight: '600' },
+  periodTextActive: { color: '#090d16', fontWeight: '700' },
+  chartCard: { backgroundColor: '#111827', borderRadius: 20, padding: 16, borderWidth: 1, borderColor: '#1f2937', marginBottom: 20 },
+  chartTitle: { color: '#ffffff', fontSize: 16, fontWeight: '700', marginBottom: 16 },
+  chartArea: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8, height: 180 },
+  chartBarWrapper: { flex: 1, alignItems: 'center', gap: 4 },
+  chartBarValue: { color: '#94a3b8', fontSize: 9, fontWeight: '600', opacity: 0 },
+  chartBar: { width: '100%', maxWidth: 32, borderRadius: 8, backgroundColor: '#10b981' },
+  chartBarLabel: { color: '#64748b', fontSize: 10, fontWeight: '600', marginTop: 4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24 },
   statCard: { width: '47%', backgroundColor: '#111827', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1f2937', marginBottom: 12 },
   statValue: { color: '#ffffff', fontSize: 20, fontWeight: '800', marginTop: 8 },

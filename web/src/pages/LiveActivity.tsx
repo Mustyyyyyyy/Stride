@@ -304,7 +304,7 @@ export const LiveActivity: React.FC = () => {
               title: 'Workout Saved! 🎉',
               message: `${workout.title} — ${km} km in ${mins} min, ${workout.calories} kcal burned. Amazing effort!`,
               icon: '✅',
-              actionPage: 'history',
+              actionPage: 'workout-summary',
             });
           }}
           className="flex-1 py-4 rounded-2xl bg-rose-600 text-white font-extrabold text-base flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 hover:scale-[1.02] transition-transform"
