@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
+  "workspaces": [
+    "backend",
+    "web",
+    "mobile"
+  ],
   "scripts": {
     "build": "npm run build:backend && npm run build:web",
     "build:web": "npm --prefix web run build",
