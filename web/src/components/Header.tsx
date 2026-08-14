@@ -3,7 +3,7 @@ import { useAppStore, PageView } from '../store/useAppStore';
 import {
   Activity, LayoutDashboard, History, BarChart3, Target,
   Smartphone, Share, PlusSquare, X, Sun, Moon, Bell,
-  Trophy, Zap, User, Users, Home,
+  Trophy, Zap, User, Users, Home, Map,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -46,9 +46,10 @@ export const Header: React.FC = () => {
 
   // ─── Desktop nav (all pages) ──────────────────────────────────────────────
   const desktopNavItems: Array<{ id: PageView; label: string; icon: React.ReactNode; badge?: number }> = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'dashboard', label: 'Home', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'feed', label: 'Feed', icon: <Users className="w-4 h-4" /> },
     { id: 'live-activity', label: 'Record', icon: <Activity className="w-4 h-4" /> },
+    { id: 'maps', label: 'Maps', icon: <Map className="w-4 h-4" /> },
     { id: 'history', label: 'History', icon: <History className="w-4 h-4" /> },
     { id: 'stats', label: 'Stats', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'goals', label: 'Goals', icon: <Target className="w-4 h-4" /> },

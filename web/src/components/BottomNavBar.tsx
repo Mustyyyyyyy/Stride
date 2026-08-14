@@ -1,20 +1,20 @@
 import React from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { LayoutDashboard, History, Bell, Share2, Settings } from 'lucide-react';
+import { LayoutDashboard, History, Play, User, Map } from 'lucide-react';
 
 export const BottomNavBar: React.FC = () => {
   const activePage = useAppStore((s) => s.activePage);
   const setActivePage = useAppStore((s) => s.setActivePage);
 
-  const tabs: { id: 'dashboard' | 'feed' | 'history' | 'notifications' | 'settings'; label: string; icon: React.ReactNode }[] = [
+  const tabs: { id: 'dashboard' | 'maps' | 'live-activity' | 'profile' | 'history'; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: 'Home', icon: <LayoutDashboard size={22} /> },
-    { id: 'feed', label: 'Feed', icon: <Share2 size={22} /> },
+    { id: 'maps', label: 'Maps', icon: <Map size={22} /> },
+    { id: 'live-activity', label: 'Record', icon: <Play size={22} /> },
+    { id: 'profile', label: 'You', icon: <User size={22} /> },
     { id: 'history', label: 'History', icon: <History size={22} /> },
-    { id: 'notifications', label: 'Alerts', icon: <Bell size={22} /> },
-    { id: 'settings', label: 'Settings', icon: <Settings size={22} /> },
   ];
 
-  const handleTabChange = (tabId: 'dashboard' | 'feed' | 'history' | 'notifications' | 'settings') => {
+  const handleTabChange = (tabId: 'dashboard' | 'maps' | 'live-activity' | 'profile' | 'history') => {
     setActivePage(tabId);
   };
 

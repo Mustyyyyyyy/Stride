@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Settings } from 'lucide-react-native';
+import { Settings, Bell, User } from 'lucide-react-native';
 
 interface MobileHeaderProps {
   onSettingsPress?: () => void;
+  onNotificationsPress?: () => void;
+  onProfilePress?: () => void;
 }
 
-export const MobileHeader: React.FC<MobileHeaderProps> = ({ onSettingsPress }) => {
+export const MobileHeader: React.FC<MobileHeaderProps> = ({ onSettingsPress, onNotificationsPress, onProfilePress }) => {
   return (
     <View style={styles.container}>
       <View style={styles.brand}>
@@ -15,14 +17,22 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onSettingsPress }) =
         </View>
         <Text style={styles.brandText}>STRIDE</Text>
       </View>
-      <TouchableOpacity
-        style={styles.settingsButton}
-        onPress={onSettingsPress}
-        activeOpacity={0.7}
-      >
-        <Settings size={24} color="#10b981" />
-        <Text style={styles.settingsLabel}>Settings</Text>
-      </TouchableOpacity>
+      <View style={styles.rightControls}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={onNotificationsPress}
+          activeOpacity={0.7}
+        >
+          <Bell size={22} color="#10b981" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={onProfilePress || onSettingsPress}
+          activeOpacity={0.7}
+        >
+          <User size={22} color="#10b981" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -36,7 +46,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#090d16',
     borderBottomWidth: 1,
-    borderBottomColor: '#1f2937',
+    borderBottomColor: '#1e293b',
     minHeight: 56,
   },
   brand: {
@@ -61,20 +71,19 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 1,
   },
-  settingsButton: {
+  rightControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    gap: 12,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
     backgroundColor: '#0f172a',
     borderWidth: 1,
     borderColor: '#1e293b',
-  },
-  settingsLabel: {
-    color: '#10b981',
-    fontSize: 13,
-    fontWeight: '800',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

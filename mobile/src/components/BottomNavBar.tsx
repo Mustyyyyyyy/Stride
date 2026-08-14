@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { LayoutDashboard, History, Bell, Share2, Settings } from 'lucide-react-native';
+import { Home, Map, CirclePlay, User, History } from 'lucide-react-native';
 
-type NavTab = 'dashboard' | 'history' | 'notifications' | 'feed' | 'settings';
+type NavTab = 'home' | 'maps' | 'record' | 'you' | 'history';
 
 interface BottomNavBarProps {
   activeTab: NavTab;
@@ -12,40 +12,27 @@ interface BottomNavBarProps {
 export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onTabChange }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.tab}
-        onPress={() => onTabChange('dashboard')}
-      >
-        <LayoutDashboard size={22} color={activeTab === 'dashboard' ? '#10b981' : '#64748b'} />
-        <Text style={[styles.tabText, activeTab === 'dashboard' && styles.tabTextActive]}>Home</Text>
+      <TouchableOpacity style={styles.tab} onPress={() => onTabChange('home')}>
+        <Home size={22} color={activeTab === 'home' ? '#10b981' : '#64748b'} />
+        <Text style={[styles.tabText, activeTab === 'home' && styles.tabTextActive]}>Home</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.tab}
-        onPress={() => onTabChange('feed')}
-      >
-        <Share2 size={22} color={activeTab === 'feed' ? '#10b981' : '#64748b'} />
-        <Text style={[styles.tabText, activeTab === 'feed' && styles.tabTextActive]}>Feed</Text>
+      <TouchableOpacity style={styles.tab} onPress={() => onTabChange('maps')}>
+        <Map size={22} color={activeTab === 'maps' ? '#10b981' : '#64748b'} />
+        <Text style={[styles.tabText, activeTab === 'maps' && styles.tabTextActive]}>Maps</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.tab}
-        onPress={() => onTabChange('history')}
-      >
+      <TouchableOpacity style={styles.tab} onPress={() => onTabChange('record')}>
+        <View style={[styles.recordCircle, activeTab === 'record' && styles.recordCircleActive]}>
+          <CirclePlay size={22} color={activeTab === 'record' ? '#090d16' : '#64748b'} />
+        </View>
+        <Text style={[styles.tabText, activeTab === 'record' && styles.tabTextActive]}>Record</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.tab} onPress={() => onTabChange('you')}>
+        <User size={22} color={activeTab === 'you' ? '#10b981' : '#64748b'} />
+        <Text style={[styles.tabText, activeTab === 'you' && styles.tabTextActive]}>You</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.tab} onPress={() => onTabChange('history')}>
         <History size={22} color={activeTab === 'history' ? '#10b981' : '#64748b'} />
         <Text style={[styles.tabText, activeTab === 'history' && styles.tabTextActive]}>History</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.tab}
-        onPress={() => onTabChange('notifications')}
-      >
-        <Bell size={22} color={activeTab === 'notifications' ? '#10b981' : '#64748b'} />
-        <Text style={[styles.tabText, activeTab === 'notifications' && styles.tabTextActive]}>Alerts</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.tab}
-        onPress={() => onTabChange('settings')}
-      >
-        <Settings size={22} color={activeTab === 'settings' ? '#10b981' : '#64748b'} />
-        <Text style={[styles.tabText, activeTab === 'settings' && styles.tabTextActive]}>Settings</Text>
       </TouchableOpacity>
     </View>
   );
@@ -74,5 +61,19 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: '#10b981',
+  },
+  recordCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#1e293b',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#334155',
+  },
+  recordCircleActive: {
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
   },
 });

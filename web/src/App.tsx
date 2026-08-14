@@ -15,6 +15,9 @@ import { WorkoutSummary } from './pages/WorkoutSummary';
 import { SettingsScreen } from './pages/SettingsScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { AuthPage } from './pages/AuthPage';
+import { MapsPage } from './pages/MapsPage';
+import { SupportPage } from './pages/SupportPage';
+import { LegalPage } from './pages/LegalPage';
 import { WifiOff } from 'lucide-react';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
 import { BottomNavBar } from './components/BottomNavBar';
@@ -115,6 +118,9 @@ export const App: React.FC = () => {
         {activePage === 'notifications'    && <NotificationsPage />}
         {activePage === 'feed'             && <FeedPage />}
         {activePage === 'challenges'       && <ChallengesPage />}
+        {activePage === 'maps'             && <MapsPage />}
+        {activePage === 'support'          && <SupportPage />}
+        {activePage === 'legal'            && <LegalPage />}
       </main>
 
       {/* Mobile bottom navigation - hidden on desktop */}

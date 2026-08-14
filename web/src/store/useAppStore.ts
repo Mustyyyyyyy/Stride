@@ -4,7 +4,7 @@ import { api } from '../services/api';
 import { estimateSteps } from '../services/StepEstimator';
 import { webBackgroundStepService } from '../services/WebBackgroundStepService';
 
-export type PageView = 'dashboard' | 'live-activity' | 'history' | 'workout-detail' | 'workout-summary' | 'stats' | 'goals' | 'profile' | 'settings' | 'notifications' | 'feed' | 'challenges';
+export type PageView = 'dashboard' | 'live-activity' | 'history' | 'workout-detail' | 'workout-summary' | 'stats' | 'goals' | 'profile' | 'settings' | 'notifications' | 'feed' | 'challenges' | 'maps' | 'support' | 'legal';
 
 export type NotificationType = 'activity' | 'achievement' | 'goal' | 'reminder' | 'system';
 

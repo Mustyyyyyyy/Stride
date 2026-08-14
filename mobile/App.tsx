@@ -13,10 +13,14 @@ import { useGoalStore } from './src/store/useGoalStore';
 import { LiveTrackingScreen } from './src/screens/LiveTrackingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { WorkoutSummaryScreen } from './src/screens/WorkoutSummaryScreen';
+import { YouScreen } from './src/screens/YouScreen';
+import { MapsScreen } from './src/screens/MapsScreen';
+import { SupportScreen } from './src/screens/SupportScreen';
+import { LegalScreen } from './src/screens/LegalScreen';
 import { backgroundStepService } from './src/services/BackgroundStepService';
 import { permissionService } from './src/services/PermissionService';
 
-type NavTab = 'dashboard' | 'history' | 'notifications' | 'feed' | 'settings' | 'onboarding' | 'liveTracking' | 'workoutSummary' | 'workoutDetail';
+type NavTab = 'home' | 'maps' | 'record' | 'you' | 'history' | 'onboarding' | 'liveTracking' | 'workoutSummary' | 'workoutDetail' | 'settings' | 'support' | 'legal';
 
 export default function App() {
   const hydrateActivity = useActivityStore((s) => s.hydrateFromApi);
@@ -25,7 +29,7 @@ export default function App() {
   const lastCompletedWorkout = useActivityStore((s) => s.lastCompletedWorkout);
   const clearLastCompletedWorkout = useActivityStore((s) => s.clearLastCompletedWorkout);
   const recentActivities = useActivityStore((s) => s.recentActivities);
-  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+  const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,25 +72,31 @@ export default function App() {
 
   const renderScreen = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return <DashboardScreen onOpenOnboarding={() => setActiveTab('onboarding')} onOpenSettings={() => setActiveTab('settings')} onStartActivity={() => setActiveTab('liveTracking')} />;
+      case 'home':
+        return <DashboardScreen onOpenOnboarding={() => setActiveTab('onboarding')} onStartActivity={() => setActiveTab('liveTracking')} />;
+      case 'maps':
+        return <MapsScreen />;
+      case 'record':
+        return <LiveTrackingScreen onWorkoutComplete={() => setActiveTab('workoutSummary')} />;
+      case 'you':
+        return <YouScreen onOpenSettings={() => setActiveTab('settings')} />;
       case 'history':
         return <HistoryScreen onSelectWorkout={(id) => { setSelectedWorkoutId(id); setActiveTab('workoutDetail'); }} />;
-      case 'notifications':
-        return <NotificationsScreen />;
-      case 'feed':
-        return <FeedScreen />;
       case 'settings':
-        return <SettingsScreen />;
+        return <SettingsScreen onNavigate={{ support: () => setActiveTab('support'), legal: () => setActiveTab('legal') }} />;
+      case 'support':
+        return <SupportScreen />;
+      case 'legal':
+        return <LegalScreen />;
       case 'onboarding':
-        return <OnboardingScreen onFinish={() => setActiveTab('dashboard')} />;
+        return <OnboardingScreen onFinish={() => setActiveTab('home')} />;
       case 'workoutSummary':
         return (
           <WorkoutSummaryScreen
             workout={lastCompletedWorkout}
             onDone={() => {
               clearLastCompletedWorkout();
-              setActiveTab('dashboard');
+              setActiveTab('home');
             }}
           />
         );
@@ -106,22 +116,23 @@ export default function App() {
           </View>
         );
       default:
-        return <DashboardScreen onOpenOnboarding={() => setActiveTab('onboarding')} onOpenSettings={() => setActiveTab('settings')} onStartActivity={() => setActiveTab('liveTracking')} />;
+        return <DashboardScreen onOpenOnboarding={() => setActiveTab('onboarding')} onStartActivity={() => setActiveTab('liveTracking')} />;
     }
   };
 
-  const showHeader = activeTab !== 'onboarding' && activeTab !== 'workoutSummary' && activeTab !== 'workoutDetail';
+  const showMainHeader = activeTab !== 'onboarding' && activeTab !== 'workoutSummary' && activeTab !== 'workoutDetail' && activeTab !== 'you';
+  const showBottomNav = activeTab !== 'onboarding' && activeTab !== 'workoutSummary' && activeTab !== 'workoutDetail' && activeTab !== 'settings' && activeTab !== 'support' && activeTab !== 'legal';
 
   return (
     <View style={{ flex: 1, backgroundColor: '#090d16' }}>
       <StatusBar barStyle="light-content" backgroundColor="#090d16" />
-      {showHeader && (
+      {showMainHeader && (
         <MobileHeader onSettingsPress={() => setActiveTab('settings')} />
       )}
       <View style={{ flex: 1 }}>
         {renderScreen()}
       </View>
-      {activeTab !== 'onboarding' && activeTab !== 'workoutSummary' && activeTab !== 'workoutDetail' && (
+      {showBottomNav && (
         <BottomNavBar activeTab={activeTab} onTabChange={setActiveTab} />
       )}
     </View>
