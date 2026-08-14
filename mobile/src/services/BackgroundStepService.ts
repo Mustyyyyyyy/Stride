@@ -12,6 +12,7 @@ class BackgroundStepService {
   private todayDate: string = '';
   private listeners: Set<(steps: number) => void> = new Set();
   private appStateSubscription: any = null;
+  private stepCallback: ((totalSteps: number) => void) | null = null;
 
   private getTodayDateString(): string {
     const now = new Date();
@@ -68,13 +69,14 @@ class BackgroundStepService {
         return false;
       }
 
-      // Get current total steps as baseline
+      // Get current total steps as baseline, preserving any previously stored value
       const currentTotal = await stepCounter.getTodaySteps();
-      this.lastKnownSteps = Math.max(0, currentTotal);
+      const storedTotal = parseInt(Storage.getString(DAILY_STEPS_KEY) || '0', 10);
+      this.lastKnownSteps = Math.max(storedTotal, Math.max(0, currentTotal));
       Storage.setString(DAILY_STEPS_KEY, String(this.lastKnownSteps));
 
       // Start watching for step updates
-      const callback = (totalSteps: number) => {
+      this.stepCallback = (totalSteps: number) => {
         const delta = Math.max(0, totalSteps);
         if (delta >= this.lastKnownSteps) {
           this.lastKnownSteps = delta;
@@ -83,17 +85,17 @@ class BackgroundStepService {
         }
       };
 
-      const started = stepCounter.startWatching(callback);
+      const started = stepCounter.startWatching(this.stepCallback);
 
       if (started) {
         this.isRunning = true;
         this.notifyListeners(this.lastKnownSteps);
 
-        // Listen for app state changes to restart step counter when app comes to foreground
+        // Listen for app state changes to refresh step count when app comes to foreground
         this.appStateSubscription = AppState.addEventListener('change', (nextState: string) => {
           if (nextState === 'active' && this.isRunning) {
-            // Restart step counter to ensure it's actively receiving updates
-            this.restart();
+            // Refresh step count from the native counter without restarting it
+            this.refreshSteps();
           }
         });
       }
@@ -105,36 +107,16 @@ class BackgroundStepService {
     }
   }
 
-  private async restart(): Promise<void> {
+  private async refreshSteps(): Promise<void> {
     try {
-      // Stop existing watcher
-      stepCounter.stopWatchingAll();
-      this.isRunning = false;
-
-      // Small delay to ensure clean restart
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Restart with current baseline
       const currentTotal = await stepCounter.getTodaySteps();
-      this.lastKnownSteps = Math.max(this.lastKnownSteps, currentTotal);
-      Storage.setString(DAILY_STEPS_KEY, String(this.lastKnownSteps));
-
-      const callback = (totalSteps: number) => {
-        const delta = Math.max(0, totalSteps);
-        if (delta >= this.lastKnownSteps) {
-          this.lastKnownSteps = delta;
-          Storage.setString(DAILY_STEPS_KEY, String(delta));
-          this.notifyListeners(delta);
-        }
-      };
-
-      const started = stepCounter.startWatching(callback);
-      if (started) {
-        this.isRunning = true;
-        this.notifyListeners(this.lastKnownSteps);
+      if (currentTotal >= this.lastKnownSteps) {
+        this.lastKnownSteps = currentTotal;
+        Storage.setString(DAILY_STEPS_KEY, String(currentTotal));
+        this.notifyListeners(currentTotal);
       }
-    } catch (e) {
-      console.warn('BackgroundStepService: Failed to restart', e);
+    } catch {
+      // ignore
     }
   }
 
@@ -143,7 +125,10 @@ class BackgroundStepService {
       this.appStateSubscription.remove();
       this.appStateSubscription = null;
     }
-    stepCounter.stopWatchingAll();
+    if (this.stepCallback) {
+      stepCounter.stopWatching(this.stepCallback);
+      this.stepCallback = null;
+    }
     this.isRunning = false;
   }
 

@@ -17,7 +17,7 @@ const ACTIVITY_OPTIONS: Array<{ type: ActivityType; label: string; icon: React.R
   { type: 'HIKING', label: 'Hike', icon: <Mountain size={28} color='#a855f7' />, color: '#a855f7' },
 ];
 
-export const LiveTrackingScreen: React.FC = () => {
+export const LiveTrackingScreen: React.FC<{ onWorkoutComplete?: () => void }> = ({ onWorkoutComplete }) => {
   const {
     isTracking,
     isPaused,
@@ -107,6 +107,35 @@ export const LiveTrackingScreen: React.FC = () => {
     }
   }, [isTracking]);
 
+  // Stop background GPS when workout is no longer tracking
+  useEffect(() => {
+    if (!isTracking) {
+      try {
+        const BackgroundGeolocation = require('react-native-background-geolocation').default;
+        if (BackgroundGeolocation) {
+          BackgroundGeolocation.stop();
+          BackgroundGeolocation.removeAllListeners();
+        }
+      } catch {
+        // ignore
+      }
+      gpsStartedRef.current = false;
+      setUseRealGps(false);
+      setGpsAccuracy(null);
+    }
+    return () => {
+      try {
+        const BackgroundGeolocation = require('react-native-background-geolocation').default;
+        if (BackgroundGeolocation) {
+          BackgroundGeolocation.stop();
+          BackgroundGeolocation.removeAllListeners();
+        }
+      } catch {
+        // ignore
+      }
+    };
+  }, [isTracking]);
+
   useEffect(() => {
     if (!isTracking) return;
     let mounted = true;
@@ -151,8 +180,33 @@ export const LiveTrackingScreen: React.FC = () => {
     }
 
     const subscription = AppState.addEventListener('change', (nextState) => {
-      if (nextState === 'active' && isTracking && !gpsStartedRef.current) {
-        startRealGps();
+      if (nextState === 'active' && isTracking) {
+        // Restart GPS when app comes to foreground to ensure continuous tracking
+        if (!gpsStartedRef.current) {
+          startRealGps();
+        } else {
+          try {
+            const BackgroundGeolocation = require('react-native-background-geolocation').default;
+            if (BackgroundGeolocation) {
+              BackgroundGeolocation.start({
+                desiredAccuracy: 10,
+                distanceFilter: 5,
+                stationaryRadius: 25,
+                notificationTitle: 'Stride GPS Tracking',
+                notificationText: 'Tracking your activity in background',
+                debug: false,
+                pauseLocationUpdates: false,
+                stopOnTerminate: false,
+                startOnBoot: true,
+                foregroundService: true,
+                disableStopDetection: false,
+                preventSuspend: true,
+              });
+            }
+          } catch {
+            // ignore
+          }
+        }
       }
     });
 
@@ -207,6 +261,16 @@ export const LiveTrackingScreen: React.FC = () => {
         foregroundService: true,
         disableStopDetection: false,
         preventSuspend: true,
+        // Android foreground service configuration
+        notification: {
+          title: 'Stride GPS Tracking',
+          text: 'Tracking your activity in background',
+          icon: 'ic_location',
+          channelId: 'stride-gps-channel',
+          channelName: 'Stride GPS Tracking',
+          channelDescription: 'Shows when Stride is tracking your location in the background',
+          priority: 'LOW',
+        },
       });
 
       gpsStartedRef.current = true;
@@ -385,13 +449,8 @@ export const LiveTrackingScreen: React.FC = () => {
           </TouchableOpacity>
         )}
         <TouchableOpacity style={[styles.btn, styles.finishBtn]} onPress={async () => {
-          const workout = await finishWorkout();
-          // allow user to share the workout card after saving
-          try {
-            await shareWorkoutImage(workout as any);
-          } catch {
-            // ignore
-          }
+          await finishWorkout();
+          if (onWorkoutComplete) onWorkoutComplete();
         }}>
           <Square size={18} color="#ffffff" fill="#ffffff" />
           <Text style={styles.finishBtnText}>FINISH & SAVE</Text>

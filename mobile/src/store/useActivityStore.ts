@@ -25,6 +25,7 @@ interface ActivityTrackingState {
   useRealSteps: boolean;
   startPedometerSteps: number;
   workoutStepCallback?: (steps: number) => void;
+  lastCompletedWorkout: WorkoutActivity | null;
 
   setActivityType: (type: ActivityType) => void;
   startWorkout: () => Promise<void>;
@@ -32,9 +33,10 @@ interface ActivityTrackingState {
   resumeWorkout: () => void;
   addGpsPoint: (lat: number, lon: number, speed?: number, accuracy?: number, alt?: number) => void;
   tickTimer: () => void;
-  finishWorkout: () => WorkoutActivity;
+  finishWorkout: () => Promise<WorkoutActivity>;
   discardWorkout: () => void;
   hydrateFromApi: () => Promise<void>;
+  clearLastCompletedWorkout: () => void;
 }
 
 export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
@@ -56,6 +58,9 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
   useRealSteps: false,
   startPedometerSteps: 0,
   workoutStepCallback: undefined,
+  lastCompletedWorkout: null,
+
+  clearLastCompletedWorkout: () => set({ lastCompletedWorkout: null }),
 
   hydrateFromApi: async () => {
     set({ isLoading: true });
@@ -215,7 +220,7 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
     });
   },
 
-  finishWorkout: async () => {
+  finishWorkout: async (): Promise<WorkoutActivity> => {
     const state = get();
     const endTime = new Date().toISOString();
     const typeLabel = state.selectedActivityType.charAt(0) + state.selectedActivityType.slice(1).toLowerCase();
@@ -285,6 +290,7 @@ export const useActivityStore = create<ActivityTrackingState>((set, get) => ({
       isPaused: false,
       stepsCount: finalSteps,
       recentActivities: updatedActivities,
+      lastCompletedWorkout: workout,
     });
 
     return workout;

@@ -4,6 +4,7 @@ import { Svg, Circle } from 'react-native-svg';
 import { Zap, Footprints, Bike, Mountain, MapPin, Flame, Target, Play, Settings } from 'lucide-react-native';
 import { useActivityStore } from '../store/useActivityStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { backgroundStepService } from '../services/BackgroundStepService';
 import { WorkoutActivity } from '../types';
 
 type ActivityType = 'RUNNING' | 'WALKING' | 'CYCLING' | 'HIKING';
@@ -49,10 +50,39 @@ export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSe
   const { user } = useAuthStore();
   const { recentActivities, hydrateFromApi } = useActivityStore();
   const [isHydrating, setIsHydrating] = useState(true);
+  const [dailySteps, setDailySteps] = useState(0);
 
   useEffect(() => {
     hydrateFromApi().finally(() => setIsHydrating(false));
   }, [hydrateFromApi]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadSteps = async () => {
+      try {
+        const steps = await backgroundStepService.getDailySteps();
+        if (mounted) {
+          setDailySteps(steps);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    loadSteps();
+
+    const unsubscribe = backgroundStepService.addListener((steps) => {
+      if (mounted) {
+        setDailySteps(steps);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
 
   const handleStart = (type: ActivityType): void => {
     const { setActivityType, startWorkout } = useActivityStore.getState();
@@ -72,7 +102,7 @@ export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSe
 
   const totalDistanceMeters = recentActivities.reduce((acc, a) => acc + a.distance, 0);
   const totalCalories = recentActivities.reduce((acc, a) => acc + a.calories, 0);
-  const totalSteps = recentActivities.reduce((acc, a) => acc + a.steps, 0);
+  const totalSteps = dailySteps > 0 ? dailySteps : recentActivities.reduce((acc, a) => acc + a.steps, 0);
   const totalDurationSecs = recentActivities.reduce((acc, a) => acc + a.duration, 0);
   const durationMins = Math.round(totalDurationSecs / 60);
 
