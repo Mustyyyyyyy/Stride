@@ -35,4 +35,6 @@ export const KEYS = {
   OFFLINE_WORKOUTS: 'stride_offline_workouts',
   WORKOUT_HISTORY: 'stride_workout_history',
   SETTINGS: 'stride_settings',
+  THEME: 'stride_theme',
+  UNIT_SYSTEM: 'stride_unit_system',
 };

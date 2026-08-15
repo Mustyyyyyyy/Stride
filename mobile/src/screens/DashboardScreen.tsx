@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 import { Svg, Circle } from 'react-native-svg';
 import { Zap, Footprints, Bike, Mountain, MapPin, Flame, Target, Play, Settings } from 'lucide-react-native';
 import { useActivityStore } from '../store/useActivityStore';
@@ -52,6 +52,8 @@ export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSe
   const { recentActivities, hydrateFromApi } = useActivityStore();
   const [isHydrating, setIsHydrating] = useState(true);
   const [dailySteps, setDailySteps] = useState(0);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   useEffect(() => {
     hydrateFromApi().finally(() => setIsHydrating(false));
@@ -110,93 +112,93 @@ export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSe
   const standTarget = 10000;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: isDark ? '#050505' : '#f6f7fb' }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={styles.userName}>{user.fullName}</Text>
+          <Text style={[styles.greeting, { color: isDark ? '#4ade80' : '#94a3b8' }]}>Welcome back,</Text>
+          <Text style={[styles.userName, { color: isDark ? '#f0fdf4' : '#0f172a' }]}>{user.fullName}</Text>
         </View>
-        <TouchableOpacity style={styles.settingsButton} onPress={() => onOpenSettings && onOpenSettings()}>
-          <Settings size={22} color="#10b981" />
+        <TouchableOpacity style={[styles.settingsButton, { backgroundColor: isDark ? '#0a0a0a' : '#ffffff', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]} onPress={() => onOpenSettings && onOpenSettings()}>
+          <Settings size={22} color={isDark ? '#34d399' : '#10b981'} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.ringsContainer}>
-        <HealthRing label="Move" value={todayCalories} max={moveTarget} color="#f43f5e" unit="kcal" />
-        <HealthRing label="Exercise" value={durationMins} max={exerciseTarget} color="#10b981" unit="mins" />
-        <HealthRing label="Steps" value={totalSteps} max={standTarget} color="#06b6d4" unit="steps" />
+        <HealthRing label="Move" value={todayCalories} max={moveTarget} color={isDark ? '#fb7185' : '#f43f5e'} unit="kcal" />
+        <HealthRing label="Exercise" value={durationMins} max={exerciseTarget} color={isDark ? '#34d399' : '#10b981'} unit="mins" />
+        <HealthRing label="Steps" value={totalSteps} max={standTarget} color={isDark ? '#22d3ee' : '#06b6d4'} unit="steps" />
       </View>
 
       <View style={styles.quickStartContainer}>
-        <Text style={styles.sectionTitle}>Quick Start Activity</Text>
+        <Text style={[styles.sectionTitle, { color: isDark ? '#f0fdf4' : '#0f172a' }]}>Quick Start Activity</Text>
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={[styles.actButton, { backgroundColor: '#10b981' }]} onPress={() => handleStart('RUNNING')}>
-            <Text style={styles.actButtonText}>Run</Text>
-            <Zap size={16} color="#090d16" />
+          <TouchableOpacity style={[styles.actButton, { backgroundColor: isDark ? '#34d399' : '#10b981' }]} onPress={() => handleStart('RUNNING')}>
+            <Text style={[styles.actButtonText, { color: isDark ? '#050505' : '#090d16' }]}>Run</Text>
+            <Zap size={16} color={isDark ? '#050505' : '#090d16'} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actButton, { backgroundColor: '#06b6d4' }]} onPress={() => handleStart('WALKING')}>
-            <Text style={styles.actButtonText}>Walk</Text>
-            <Footprints size={16} color="#090d16" />
+          <TouchableOpacity style={[styles.actButton, { backgroundColor: isDark ? '#22d3ee' : '#06b6d4' }]} onPress={() => handleStart('WALKING')}>
+            <Text style={[styles.actButtonText, { color: isDark ? '#050505' : '#090d16' }]}>Walk</Text>
+            <Footprints size={16} color={isDark ? '#050505' : '#090d16'} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actButton, { backgroundColor: '#f97316' }]} onPress={() => handleStart('CYCLING')}>
-            <Text style={styles.actButtonText}>Ride</Text>
-            <Bike size={16} color="#090d16" />
+          <TouchableOpacity style={[styles.actButton, { backgroundColor: isDark ? '#fb923c' : '#f97316' }]} onPress={() => handleStart('CYCLING')}>
+            <Text style={[styles.actButtonText, { color: isDark ? '#050505' : '#090d16' }]}>Ride</Text>
+            <Bike size={16} color={isDark ? '#050505' : '#090d16'} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actButton, { backgroundColor: '#a855f7' }]} onPress={() => handleStart('HIKING')}>
-            <Text style={styles.actButtonText}>Hike</Text>
-            <Mountain size={16} color="#090d16" />
+          <TouchableOpacity style={[styles.actButton, { backgroundColor: isDark ? '#c084fc' : '#a855f7' }]} onPress={() => handleStart('HIKING')}>
+            <Text style={[styles.actButtonText, { color: isDark ? '#050505' : '#090d16' }]}>Hike</Text>
+            <Mountain size={16} color={isDark ? '#050505' : '#090d16'} />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.statsGrid}>
-        <View style={styles.statCard}>
-          <Flame size={20} color="#f97316" />
-          <Text style={styles.statValue}>{Math.round(totalCalories)}</Text>
-          <Text style={styles.statLabel}>kcal</Text>
+        <View style={[styles.statCard, { backgroundColor: isDark ? '#0a0a0a' : '#ffffff', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+          <Flame size={20} color={isDark ? '#fb923c' : '#f97316'} />
+          <Text style={[styles.statValue, { color: isDark ? '#f0fdf4' : '#0f172a' }]}>{Math.round(totalCalories)}</Text>
+          <Text style={[styles.statLabel, { color: isDark ? '#4ade80' : '#94a3b8' }]}>kcal</Text>
         </View>
-        <View style={styles.statCard}>
-          <Target size={20} color="#10b981" />
-          <Text style={styles.statValue}>{(totalDistanceMeters / 1000).toFixed(1)}</Text>
-          <Text style={styles.statLabel}>km</Text>
+        <View style={[styles.statCard, { backgroundColor: isDark ? '#0a0a0a' : '#ffffff', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+          <Target size={20} color={isDark ? '#34d399' : '#10b981'} />
+          <Text style={[styles.statValue, { color: isDark ? '#f0fdf4' : '#0f172a' }]}>{(totalDistanceMeters / 1000).toFixed(1)}</Text>
+          <Text style={[styles.statLabel, { color: isDark ? '#4ade80' : '#94a3b8' }]}>km</Text>
         </View>
-        <View style={styles.statCard}>
-          <Footprints size={20} color="#06b6d4" />
-          <Text style={styles.statValue}>{totalSteps.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>steps</Text>
+        <View style={[styles.statCard, { backgroundColor: isDark ? '#0a0a0a' : '#ffffff', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+          <Footprints size={20} color={isDark ? '#22d3ee' : '#06b6d4'} />
+          <Text style={[styles.statValue, { color: isDark ? '#f0fdf4' : '#0f172a' }]}>{totalSteps.toLocaleString()}</Text>
+          <Text style={[styles.statLabel, { color: isDark ? '#4ade80' : '#94a3b8' }]}>steps</Text>
         </View>
-        <View style={styles.statCard}>
-          <MapPin size={20} color="#a855f7" />
-          <Text style={styles.statValue}>{recentActivities.length}</Text>
-          <Text style={styles.statLabel}>workouts</Text>
+        <View style={[styles.statCard, { backgroundColor: isDark ? '#0a0a0a' : '#ffffff', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+          <MapPin size={20} color={isDark ? '#c084fc' : '#a855f7'} />
+          <Text style={[styles.statValue, { color: isDark ? '#f0fdf4' : '#0f172a' }]}>{recentActivities.length}</Text>
+          <Text style={[styles.statLabel, { color: isDark ? '#4ade80' : '#94a3b8' }]}>workouts</Text>
         </View>
       </View>
 
       <View style={styles.recentSection}>
-        <Text style={styles.sectionTitle}>Recent Workouts</Text>
+        <Text style={[styles.sectionTitle, { color: isDark ? '#f0fdf4' : '#0f172a' }]}>Recent Workouts</Text>
         {isHydrating ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyCardText}>Loading activities...</Text>
+          <View style={[styles.emptyCard, { backgroundColor: isDark ? '#0a0a0a' : '#ffffff', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+            <Text style={[styles.emptyCardText, { color: isDark ? '#4ade80' : '#64748b' }]}>Loading activities...</Text>
           </View>
         ) : recentActivities.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyCardText}>No workouts yet. Start your first activity above!</Text>
+          <View style={[styles.emptyCard, { backgroundColor: isDark ? '#0a0a0a' : '#ffffff', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+            <Text style={[styles.emptyCardText, { color: isDark ? '#4ade80' : '#64748b' }]}>No workouts yet. Start your first activity above!</Text>
           </View>
         ) : (
           recentActivities.slice(0, 5).map((act) => (
-            <View key={act.id} style={styles.workoutCard}>
-              <View style={styles.workoutIconBox}>
-                {ACTIVITY_ICONS[act.type as ActivityType] || <Activity size={20} color="#64748b" />}
+            <View key={act.id} style={[styles.workoutCard, { backgroundColor: isDark ? '#0a0a0a' : '#ffffff', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+              <View style={[styles.workoutIconBox, { backgroundColor: isDark ? '#050505' : '#f6f7fb', borderColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+                {ACTIVITY_ICONS[act.type as ActivityType] || <Activity size={20} color={isDark ? '#4ade80' : '#64748b'} />}
               </View>
               <View style={styles.workoutInfo}>
-                <Text style={styles.workoutTitle}>{act.title}</Text>
-                <Text style={styles.workoutMeta}>
+                <Text style={[styles.workoutTitle, { color: isDark ? '#f0fdf4' : '#0f172a' }]}>{act.title}</Text>
+                <Text style={[styles.workoutMeta, { color: isDark ? '#4ade80' : '#94a3b8' }]}>
                   {new Date(act.startTime).toLocaleDateString()} • {(act.distance / 1000).toFixed(2)} km
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={styles.workoutCalories}>{act.calories} kcal</Text>
-                <Text style={styles.workoutMeta}>{Math.round(act.duration / 60)} min</Text>
+                <Text style={[styles.workoutCalories, { color: isDark ? '#fb923c' : '#f97316' }]}>{act.calories} kcal</Text>
+                <Text style={[styles.workoutMeta, { color: isDark ? '#4ade80' : '#94a3b8' }]}>{Math.round(act.duration / 60)} min</Text>
               </View>
             </View>
           ))
@@ -207,33 +209,33 @@ export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSe
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0b0f19', padding: 16 },
+  container: { flex: 1, padding: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  greeting: { color: '#94a3b8', fontSize: 14, fontWeight: '600' },
-  userName: { color: '#ffffff', fontSize: 26, fontWeight: '900', letterSpacing: -0.3 },
-  settingsButton: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1f2937' },
+  greeting: { fontSize: 14, fontWeight: '600' },
+  userName: { fontSize: 26, fontWeight: '900', letterSpacing: -0.3 },
+  settingsButton: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
   ringsContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 28, paddingVertical: 20 },
   quickStartContainer: { marginBottom: 28 },
-  sectionTitle: { color: '#ffffff', fontSize: 18, fontWeight: '800', marginBottom: 12, letterSpacing: -0.2 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', marginBottom: 12, letterSpacing: -0.2 },
   buttonRow: { flexDirection: 'row', gap: 10 },
   actButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14, borderRadius: 16, shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
-  actButtonText: { color: '#090d16', fontWeight: '800', fontSize: 13 },
+  actButtonText: { fontWeight: '800', fontSize: 13 },
   statsGrid: { flexDirection: 'row', gap: 10, marginBottom: 28 },
-  statCard: { flex: 1, backgroundColor: '#111827', borderRadius: 18, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1f2937', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
-  statValue: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 8 },
-  statLabel: { color: '#64748b', fontSize: 11, fontWeight: '600', textTransform: 'uppercase', marginTop: 2 },
+  statCard: { flex: 1, borderRadius: 18, padding: 14, alignItems: 'center', borderWidth: 1, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
+  statValue: { fontSize: 22, fontWeight: '900', marginTop: 8 },
+  statLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', marginTop: 2 },
   recentSection: { marginBottom: 24 },
-  workoutCard: { backgroundColor: '#111827', borderRadius: 16, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1f2937', gap: 12, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 1 },
-  workoutIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', alignItems: 'center', justifyContent: 'center' },
+  workoutCard: { borderRadius: 16, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 12, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 1 },
+  workoutIconBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
   workoutInfo: { flex: 1 },
-  workoutTitle: { color: '#ffffff', fontWeight: '700', fontSize: 14 },
-  workoutMeta: { color: '#94a3b8', fontSize: 12, marginTop: 3 },
-  workoutCalories: { color: '#f97316', fontWeight: '700', fontSize: 13 },
-  emptyCard: { backgroundColor: '#111827', borderRadius: 16, padding: 24, borderWidth: 1, borderColor: '#1f2937', alignItems: 'center' },
-  emptyCardText: { color: '#64748b', fontSize: 13, textAlign: 'center' },
-  emptyContainer: { flex: 1, backgroundColor: '#0b0f19', alignItems: 'center', justifyContent: 'center', padding: 24 },
-  emptyTitle: { color: '#ffffff', fontSize: 20, fontWeight: '700', marginBottom: 8 },
-  emptySub: { color: '#64748b', fontSize: 14, textAlign: 'center' },
+  workoutTitle: { fontWeight: '700', fontSize: 14 },
+  workoutMeta: { fontSize: 12, marginTop: 3 },
+  workoutCalories: { fontWeight: '700', fontSize: 13 },
+  emptyCard: { borderRadius: 16, padding: 24, borderWidth: 1, alignItems: 'center' },
+  emptyCardText: { fontSize: 13, textAlign: 'center' },
+  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  emptyTitle: { fontSize: 20, fontWeight: '700', marginBottom: 8 },
+  emptySub: { fontSize: 14, textAlign: 'center' },
 });
 
 import { Activity } from 'lucide-react-native';

@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert,
 import { useAuthStore } from '../store/useAuthStore';
 import { useAppStore } from '../store/useAppStore';
 import { useActivityStore } from '../store/useActivityStore';
-import { Settings, ChevronRight, Moon, Sun, Mail, Shield, Bell, HelpCircle, FileText, Info, LogOut, MapPin, Navigation } from 'lucide-react-native';
+import { Settings, ChevronRight, Moon, Sun, Mail, Shield, Bell, HelpCircle, FileText, Info, LogOut, MapPin, Navigation, Footprints } from 'lucide-react-native';
 import { api } from '../services/api';
+import { useColorScheme } from 'react-native';
 
 interface SettingsScreenProps {
   onNavigate?: { support: () => void; legal: () => void };
@@ -12,19 +13,32 @@ interface SettingsScreenProps {
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate }) => {
   const { user, updateProfile, logout } = useAuthStore();
-  const { unitSystem, setUnitSystem, theme, toggleTheme } = useAppStore();
+  const { unitSystem, setUnitSystem, theme, toggleTheme, backgroundStepsEnabled, setBackgroundStepsEnabled, init } = useAppStore();
   const { recentActivities } = useActivityStore();
   const [email, setEmail] = useState(user?.email || '');
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [bgStepsLoading, setBgStepsLoading] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = theme === 'DARK' || (theme === 'SYSTEM' && colorScheme === 'dark');
 
   useEffect(() => {
     setEmail(user?.email || '');
+    init();
   }, [user?.email]);
 
   const handleUpdateEmail = () => {
     updateProfile({ email });
     Alert.alert('Success', 'Email updated successfully.');
+  };
+
+  const handleToggleBackgroundSteps = async () => {
+    setBgStepsLoading(true);
+    try {
+      await setBackgroundStepsEnabled(!backgroundStepsEnabled);
+    } finally {
+      setBgStepsLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -145,9 +159,28 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate }) =>
             </TouchableOpacity>
           </View>
 
-          <View style={[styles.settingRow, { borderTopWidth: 1, borderTopColor: '#1e293b' }]}>
+          <View style={[styles.settingRow, { borderTopWidth: 1, borderTopColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
             <View style={styles.settingIcon}>
-              <Bell size={18} color="#f59e0b" />
+              <Footprints size={18} color={isDark ? '#22d3ee' : '#06b6d4'} />
+            </View>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Background Steps</Text>
+              <Text style={styles.settingValue}>Count steps even when the app is closed</Text>
+            </View>
+            <TouchableOpacity
+              onPress={handleToggleBackgroundSteps}
+              disabled={bgStepsLoading}
+              style={[styles.toggleBtn, backgroundStepsEnabled && styles.toggleBtnActive, bgStepsLoading && { opacity: 0.6 }]}
+            >
+              <Text style={[styles.toggleBtnText, backgroundStepsEnabled && styles.toggleBtnTextActive]}>
+                {bgStepsLoading ? '...' : backgroundStepsEnabled ? 'ON' : 'OFF'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.settingRow, { borderTopWidth: 1, borderTopColor: isDark ? '#16b98133' : '#e2e8f0' }]}>
+            <View style={styles.settingIcon}>
+              <Bell size={18} color={isDark ? '#fbbf24' : '#f59e0b'} />
             </View>
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>Notifications</Text>
@@ -214,34 +247,34 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate }) =>
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090d16',
+    backgroundColor: '#f6f7fb',
     padding: 16,
   },
   title: {
-    color: '#ffffff',
     fontSize: 28,
     fontWeight: '800',
     marginBottom: 4,
+    color: '#0f172a',
   },
   subtitle: {
-    color: '#94a3b8',
     fontSize: 13,
     marginBottom: 24,
+    color: '#94a3b8',
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    color: '#ffffff',
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 12,
+    color: '#0f172a',
   },
   card: {
-    backgroundColor: '#111827',
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#1f2937',
+    borderColor: '#e2e8f0',
     overflow: 'hidden',
   },
   settingRow: {
@@ -254,9 +287,9 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#0f172a',
+    backgroundColor: '#f6f7fb',
     borderWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: '#e2e8f0',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -264,23 +297,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingLabel: {
-    color: '#ffffff',
+    color: '#0f172a',
     fontSize: 14,
     fontWeight: '600',
   },
   settingValue: {
-    color: '#64748b',
+    color: '#94a3b8',
     fontSize: 12,
     marginTop: 2,
   },
   input: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#f6f7fb',
     borderRadius: 10,
     padding: 12,
-    color: '#ffffff',
+    color: '#0f172a',
     fontSize: 14,
     borderWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: '#e2e8f0',
     marginTop: 8,
   },
   saveBtn: {
@@ -290,14 +323,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   saveBtnText: {
-    color: '#090d16',
+    color: '#ffffff',
     fontWeight: '700',
     fontSize: 12,
   },
   toggleBtn: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#f6f7fb',
     borderWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: '#e2e8f0',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
@@ -307,19 +340,19 @@ const styles = StyleSheet.create({
     borderColor: '#10b981',
   },
   toggleBtnText: {
-    color: '#64748b',
+    color: '#94a3b8',
     fontSize: 12,
     fontWeight: '700',
   },
   toggleBtnTextActive: {
-    color: '#090d16',
+    color: '#ffffff',
   },
   unitToggle: {
     flexDirection: 'row',
-    backgroundColor: '#0f172a',
+    backgroundColor: '#f6f7fb',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: '#e2e8f0',
     overflow: 'hidden',
   },
   unitBtn: {
@@ -330,12 +363,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#10b981',
   },
   unitText: {
-    color: '#64748b',
+    color: '#94a3b8',
     fontSize: 11,
     fontWeight: '600',
   },
   unitTextActive: {
-    color: '#090d16',
+    color: '#ffffff',
     fontWeight: '700',
   },
   linkRow: {
@@ -346,7 +379,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     flex: 1,
-    color: '#ffffff',
+    color: '#0f172a',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -355,9 +388,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#ef444410',
+    backgroundColor: '#fef2f2',
     borderWidth: 1,
-    borderColor: '#ef444433',
+    borderColor: '#fecaca',
     paddingVertical: 16,
     borderRadius: 16,
   },
@@ -367,7 +400,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   version: {
-    color: '#64748b',
+    color: '#94a3b8',
     fontSize: 12,
     textAlign: 'center',
     marginBottom: 24,

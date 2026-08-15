@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { View, StatusBar, AppState, Text } from 'react-native';
+import { View, StatusBar, AppState, Text, useColorScheme } from 'react-native';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { GoalsScreen } from './src/screens/GoalsScreen';
@@ -31,6 +31,8 @@ export default function App() {
   const recentActivities = useActivityStore((s) => s.recentActivities);
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   useEffect(() => {
     Promise.all([hydrateActivity(), hydrateGoals()]).catch(() => {});
@@ -63,8 +65,8 @@ export default function App() {
   // Show live tracking when actively tracking OR when viewing the summary of a just-finished workout
   if (isTracking || activeTab === 'liveTracking') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#090d16' }}>
-        <StatusBar barStyle="light-content" backgroundColor="#090d16" />
+      <View style={{ flex: 1, backgroundColor: isDark ? '#050505' : '#f6f7fb' }}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={isDark ? '#050505' : '#f6f7fb'} />
         <LiveTrackingScreen onWorkoutComplete={() => setActiveTab('workoutSummary')} />
       </View>
     );
@@ -110,9 +112,9 @@ export default function App() {
             }}
           />
         ) : (
-          <View style={{ flex: 1, backgroundColor: '#090d16', alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ color: '#ffffff', fontSize: 18, fontWeight: '700' }}>No workout selected</Text>
-            <Text style={{ color: '#64748b', fontSize: 14, marginTop: 8 }}>Select a workout from History to view details.</Text>
+          <View style={{ flex: 1, backgroundColor: isDark ? '#050505' : '#f6f7fb', alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ color: isDark ? '#f0fdf4' : '#0f172a', fontSize: 18, fontWeight: '700' }}>No workout selected</Text>
+            <Text style={{ color: isDark ? '#4ade80' : '#94a3b8', fontSize: 14, marginTop: 8 }}>Select a workout from History to view details.</Text>
           </View>
         );
       default:
@@ -124,8 +126,8 @@ export default function App() {
   const showBottomNav = activeTab !== 'onboarding' && activeTab !== 'workoutSummary' && activeTab !== 'workoutDetail' && activeTab !== 'settings' && activeTab !== 'support' && activeTab !== 'legal';
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#090d16' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#090d16" />
+    <View style={{ flex: 1, backgroundColor: isDark ? '#050505' : '#f6f7fb' }}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={isDark ? '#050505' : '#f6f7fb'} />
       {showMainHeader && (
         <MobileHeader onSettingsPress={() => setActiveTab('settings')} />
       )}

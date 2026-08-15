@@ -120,7 +120,7 @@ const computeStreakDays = (activities: WorkoutActivity[]) => {
 export const useAppStore = create<AppState>((set, get) => ({
   activePage: 'dashboard',
   selectedWorkoutId: null,
-  theme: 'dark',
+  theme: 'light',
   unitSystem: 'METRIC',
   isOnline: true,
   isLoading: false,

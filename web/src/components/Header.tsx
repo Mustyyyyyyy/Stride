@@ -96,7 +96,7 @@ export const Header: React.FC = () => {
   return (
     <>
       {/* ─── Top App Bar ──────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/90 border-b border-slate-800/80 px-4 lg:px-8 py-3 transition-colors">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-primary/80 dark:bg-black/90 border-b border-slate-200/80 dark:border-emerald-500/20 px-4 lg:px-8 py-3 transition-colors">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
 
           {/* Logo / Brand */}
@@ -111,7 +111,7 @@ export const Header: React.FC = () => {
           </div>
 
           {/* ─── Desktop navigation (hidden on mobile) ─── */}
-          <nav className="hidden md:flex items-center gap-0.5 bg-slate-900/60 p-1 rounded-2xl border border-white/5">
+          <nav className="hidden md:flex items-center gap-0.5 bg-slate-100/80 dark:bg-white/5 p-1 rounded-2xl border border-slate-200/80 dark:border-emerald-500/10">
             {desktopNavItems.map((item) => (
               <NavBtn key={item.id} {...item} isActive={activePage === item.id} />
             ))}
@@ -133,12 +133,12 @@ export const Header: React.FC = () => {
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+              className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 hover:text-emerald-600 dark:bg-white/5 dark:border-emerald-500/20 dark:text-emerald-400 transition-colors"
               title="Toggle theme"
             >
               {theme === 'dark'
                 ? <Sun className="w-4 h-4 text-amber-400" />
-                : <Moon className="w-4 h-4 text-indigo-400" />}
+                : <Moon className="w-4 h-4 text-slate-600" />}
             </button>
 
             {/* Notifications bell (visible on all sizes) */}
@@ -146,8 +146,8 @@ export const Header: React.FC = () => {
               onClick={() => setActivePage('notifications')}
               className={`relative p-2 rounded-xl border transition-all ${
                 activePage === 'notifications'
-                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                  : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white'
+                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-emerald-600 dark:bg-white/5 dark:border-emerald-500/20 dark:text-emerald-400'
               }`}
               title="Notifications"
             >
@@ -178,7 +178,7 @@ export const Header: React.FC = () => {
       </header>
 
       {/* ─── Mobile Bottom Navigation Bar ────────────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/80 px-2 py-2 safe-area-pb">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-black/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-emerald-500/20 px-2 py-2 safe-area-pb">
         <div className="flex items-center justify-around">
           {mobileBottomNav.map((item) => {
             const isActive = activePage === item.id;
@@ -189,10 +189,10 @@ export const Header: React.FC = () => {
                 onClick={() => setActivePage(item.id)}
                 className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all relative ${
                   isRecord
-                    ? `${isActive ? 'bg-emerald-500 text-slate-950' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'} rounded-2xl px-5 py-2.5 -mt-4 shadow-lg shadow-emerald-500/20`
+                    ? `${isActive ? 'bg-emerald-500 text-slate-950' : 'bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 dark:text-emerald-400'} rounded-2xl px-5 py-2.5 -mt-4 shadow-lg shadow-emerald-500/20`
                     : isActive
-                    ? 'text-emerald-400'
-                    : 'text-slate-500 hover:text-slate-300'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
                 {item.icon}
