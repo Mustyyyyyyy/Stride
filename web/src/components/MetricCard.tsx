@@ -37,28 +37,28 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     <div className="glass-card p-5 relative overflow-hidden group">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">{title}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">{title}</p>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-extrabold font-display tracking-tight text-white">{value}</span>
-            {unit && <span className="text-xs font-bold text-slate-400 uppercase">{unit}</span>}
+            {unit && <span className="text-[10px] font-bold text-slate-400 uppercase">{unit}</span>}
           </div>
-          {trend && <p className="text-xs text-emerald-400 font-medium mt-1">{trend}</p>}
+          {trend && <p className="text-[11px] text-emerald-400 font-medium mt-1">{trend}</p>}
         </div>
 
-        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${colorStyles} border flex items-center justify-center shadow-lg transition-transform group-hover:scale-110`}>
+        <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${colorStyles} border flex items-center justify-center shadow-lg transition-transform group-hover:scale-110`}>
           {icon}
         </div>
       </div>
 
       {progressPercent !== undefined && (
-        <div className="mt-4 pt-3 border-t border-slate-800/80">
-          <div className="flex justify-between items-center text-xs mb-1.5">
+        <div className="mt-4 pt-3 border-t border-white/[0.04]">
+          <div className="flex justify-between items-center text-[11px] mb-1.5">
             <span className="text-slate-400 font-medium">Daily Goal Progress</span>
             <span className="font-bold text-slate-200">{Math.min(100, Math.round(progressPercent))}%</span>
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-800/80 overflow-hidden p-0.5">
+          <div className="w-full h-1.5 rounded-full bg-slate-800/80 overflow-hidden">
             <div
-              className={`h-full rounded-full ${barStyles} transition-all duration-500 shadow-sm`}
+              className={`h-full rounded-full ${barStyles} transition-all duration-500`}
               style={{ width: `${Math.min(100, Math.max(0, progressPercent))}%` }}
             />
           </div>

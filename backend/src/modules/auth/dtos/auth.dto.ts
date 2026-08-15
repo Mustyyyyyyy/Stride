@@ -51,3 +51,15 @@ export class ForgotPasswordDto {
   @IsNotEmpty()
   email: string;
 }
+
+export class ResetPasswordDto {
+  @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @ApiProperty({ example: 'NewSecurePassword123!' })
+  @IsString()
+  @MinLength(6)
+  password: string;
+}

@@ -5,6 +5,7 @@ import { Zap, Footprints, Bike, Mountain, MapPin, Flame, Target, Play, Settings 
 import { useActivityStore } from '../store/useActivityStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { backgroundStepService } from '../services/BackgroundStepService';
+import { LoginScreen } from './LoginScreen';
 import { WorkoutActivity } from '../types';
 
 type ActivityType = 'RUNNING' | 'WALKING' | 'CYCLING' | 'HIKING';
@@ -92,19 +93,17 @@ export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSe
   };
 
   if (!user) {
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyTitle}>Welcome to Stride</Text>
-        <Text style={styles.emptySub}>Sign in to start tracking your fitness journey.</Text>
-      </View>
-    );
+    return <LoginScreen />;
   }
 
   const totalDistanceMeters = recentActivities.reduce((acc, a) => acc + a.distance, 0);
-  const totalCalories = recentActivities.reduce((acc, a) => acc + a.calories, 0);
-  const totalSteps = dailySteps > 0 ? dailySteps : recentActivities.reduce((acc, a) => acc + a.steps, 0);
-  const totalDurationSecs = recentActivities.reduce((acc, a) => acc + a.duration, 0);
-  const durationMins = Math.round(totalDurationSecs / 60);
+  const today = new Date().toISOString().split('T')[0];
+  const todayActivities = recentActivities.filter((a) => (a.startTime || '').startsWith(today));
+  const todayCalories = todayActivities.reduce((acc, a) => acc + a.calories, 0);
+  const todayDurationSecs = todayActivities.reduce((acc, a) => acc + a.duration, 0);
+  const todayStepsFromActivities = todayActivities.reduce((acc, a) => acc + (a.steps || 0), 0);
+  const totalSteps = dailySteps > 0 ? dailySteps : todayStepsFromActivities;
+  const durationMins = Math.round(todayDurationSecs / 60);
 
   const moveTarget = 500;
   const exerciseTarget = 60;
@@ -123,7 +122,7 @@ export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSe
       </View>
 
       <View style={styles.ringsContainer}>
-        <HealthRing label="Move" value={totalCalories} max={moveTarget} color="#f43f5e" unit="kcal" />
+        <HealthRing label="Move" value={todayCalories} max={moveTarget} color="#f43f5e" unit="kcal" />
         <HealthRing label="Exercise" value={durationMins} max={exerciseTarget} color="#10b981" unit="mins" />
         <HealthRing label="Steps" value={totalSteps} max={standTarget} color="#06b6d4" unit="steps" />
       </View>
@@ -208,31 +207,31 @@ export const DashboardScreen: React.FC<{ onOpenOnboarding?: () => void; onOpenSe
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#090d16', padding: 16 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  container: { flex: 1, backgroundColor: '#0b0f19', padding: 16 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   greeting: { color: '#94a3b8', fontSize: 14, fontWeight: '600' },
-  userName: { color: '#ffffff', fontSize: 24, fontWeight: '900' },
-  settingsButton: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#0f172a', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1e293b' },
-  ringsContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 24, paddingVertical: 16 },
-  quickStartContainer: { marginBottom: 24 },
-  sectionTitle: { color: '#ffffff', fontSize: 18, fontWeight: '800', marginBottom: 12 },
+  userName: { color: '#ffffff', fontSize: 26, fontWeight: '900', letterSpacing: -0.3 },
+  settingsButton: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1f2937' },
+  ringsContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 28, paddingVertical: 20 },
+  quickStartContainer: { marginBottom: 28 },
+  sectionTitle: { color: '#ffffff', fontSize: 18, fontWeight: '800', marginBottom: 12, letterSpacing: -0.2 },
   buttonRow: { flexDirection: 'row', gap: 10 },
-  actButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14, borderRadius: 14 },
+  actButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14, borderRadius: 16, shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
   actButtonText: { color: '#090d16', fontWeight: '800', fontSize: 13 },
-  statsGrid: { flexDirection: 'row', gap: 10, marginBottom: 24 },
-  statCard: { flex: 1, backgroundColor: '#111827', borderRadius: 16, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1f2937' },
-  statValue: { color: '#ffffff', fontSize: 20, fontWeight: '900', marginTop: 8 },
+  statsGrid: { flexDirection: 'row', gap: 10, marginBottom: 28 },
+  statCard: { flex: 1, backgroundColor: '#111827', borderRadius: 18, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1f2937', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
+  statValue: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 8 },
   statLabel: { color: '#64748b', fontSize: 11, fontWeight: '600', textTransform: 'uppercase', marginTop: 2 },
   recentSection: { marginBottom: 24 },
-  workoutCard: { backgroundColor: '#111827', borderRadius: 14, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1f2937', gap: 12 },
+  workoutCard: { backgroundColor: '#111827', borderRadius: 16, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1f2937', gap: 12, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 1 },
   workoutIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', alignItems: 'center', justifyContent: 'center' },
   workoutInfo: { flex: 1 },
   workoutTitle: { color: '#ffffff', fontWeight: '700', fontSize: 14 },
   workoutMeta: { color: '#94a3b8', fontSize: 12, marginTop: 3 },
   workoutCalories: { color: '#f97316', fontWeight: '700', fontSize: 13 },
-  emptyCard: { backgroundColor: '#111827', borderRadius: 14, padding: 24, borderWidth: 1, borderColor: '#1f2937', alignItems: 'center' },
+  emptyCard: { backgroundColor: '#111827', borderRadius: 16, padding: 24, borderWidth: 1, borderColor: '#1f2937', alignItems: 'center' },
   emptyCardText: { color: '#64748b', fontSize: 13, textAlign: 'center' },
-  emptyContainer: { flex: 1, backgroundColor: '#090d16', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  emptyContainer: { flex: 1, backgroundColor: '#0b0f19', alignItems: 'center', justifyContent: 'center', padding: 24 },
   emptyTitle: { color: '#ffffff', fontSize: 20, fontWeight: '700', marginBottom: 8 },
   emptySub: { color: '#64748b', fontSize: 14, textAlign: 'center' },
 });

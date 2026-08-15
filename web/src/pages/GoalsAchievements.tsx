@@ -28,7 +28,7 @@ export const GoalsAchievements: React.FC = () => {
         </div>
         <button
           onClick={() => setShowAddGoalModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>Set New Goal</span>
@@ -84,7 +84,7 @@ export const GoalsAchievements: React.FC = () => {
                       <span className="text-xs font-bold text-slate-400">{percent}%</span>
                     )}
                   </div>
-                  <div className="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden p-0.5 border border-slate-800">
+                   <div className="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden p-0.5 border border-white/[0.04]">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500 shadow-sm"
                       style={{ width: `${percent}%` }}
@@ -98,7 +98,7 @@ export const GoalsAchievements: React.FC = () => {
       </div>
 
       {/* Achievements Badges Section */}
-      <div className="space-y-4 pt-4 border-t border-slate-800/80">
+      <div className="space-y-4 pt-4 border-t border-white/[0.04]">
         <h2 className="text-lg font-extrabold font-display text-white flex items-center gap-2">
           <Trophy className="w-5 h-5 text-amber-400" />
           <span>Achievements</span>
@@ -127,7 +127,7 @@ export const GoalsAchievements: React.FC = () => {
                 { icon: '🥇', label: 'Century Club' },
                 { icon: '🏆', label: 'Marathoner' },
               ].map((preview) => (
-                <div key={preview.label} className="flex flex-col items-center gap-1 p-3 rounded-xl bg-slate-900/60 border border-slate-800 opacity-40 grayscale">
+                 <div key={preview.label} className="flex flex-col items-center gap-1 p-3 rounded-xl bg-slate-900/60 border border-white/[0.04] opacity-40 grayscale">
                   <span className="text-xl">{preview.icon}</span>
                   <span className="text-[10px] text-slate-500 font-semibold">{preview.label}</span>
                 </div>
@@ -145,7 +145,7 @@ export const GoalsAchievements: React.FC = () => {
                     : 'opacity-50 grayscale hover:grayscale-0'
                 }`}
               >
-                <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center text-3xl shadow-lg">
+                <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-white/[0.06] mx-auto flex items-center justify-center text-3xl shadow-lg">
                   {ach.icon}
                 </div>
                 <div>
@@ -171,7 +171,7 @@ export const GoalsAchievements: React.FC = () => {
       {/* Add Goal Modal */}
       {showAddGoalModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="glass-card p-6 max-w-md w-full space-y-4 border-slate-700">
+           <div className="glass-card p-6 max-w-md w-full space-y-4 border-white/[0.08]">
             <h3 className="text-xl font-extrabold font-display text-white">Set New Fitness Goal</h3>
             <form onSubmit={handleSaveGoal} className="space-y-4">
               <div>
@@ -179,7 +179,7 @@ export const GoalsAchievements: React.FC = () => {
                 <select
                   value={goalType}
                   onChange={(e) => setGoalType(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white"
+                   className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/[0.06] text-xs text-white"
                 >
                   <option value="DAILY_STEPS">Daily Steps</option>
                   <option value="DAILY_DISTANCE">Daily Distance (meters)</option>
@@ -194,7 +194,7 @@ export const GoalsAchievements: React.FC = () => {
                   type="number"
                   value={targetVal}
                   onChange={(e) => setTargetVal(Number(e.target.value))}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white"
+                   className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/[0.06] text-xs text-white"
                 />
               </div>
               <div className="flex gap-2 pt-2">

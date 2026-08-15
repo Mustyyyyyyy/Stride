@@ -85,7 +85,7 @@ export const ChallengesPage: React.FC = () => {
         </div>
       ) : challenges.length === 0 ? (
         <div className="glass-card p-12 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-white/[0.06] mx-auto flex items-center justify-center">
             <Trophy className="w-8 h-8 text-slate-600" />
           </div>
           <div>
@@ -95,14 +95,14 @@ export const ChallengesPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 w-fit">
+          <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-2xl border border-white/[0.06] w-fit">
             {(['all', 'active', 'completed'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                   filter === f
-                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -118,7 +118,7 @@ export const ChallengesPage: React.FC = () => {
               return (
                 <div
                   key={ch.id}
-                  className={`glass-card p-5 space-y-3 bg-gradient-to-br ${ch.color} relative overflow-hidden ${
+                  className={`glass-card p-5 space-y-3 relative overflow-hidden ${
                     ch.completed ? 'border-emerald-500/40' : ''
                   }`}
                 >
@@ -129,7 +129,7 @@ export const ChallengesPage: React.FC = () => {
                   )}
 
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-center text-2xl shadow-lg">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-950/80 border border-white/[0.06] flex items-center justify-center text-2xl shadow-lg">
                       {ch.icon}
                     </div>
                     <div className="flex-1">
@@ -158,17 +158,17 @@ export const ChallengesPage: React.FC = () => {
                         {progressPercent}%
                       </span>
                     </div>
-                    <div className="w-full h-2.5 rounded-full bg-slate-900/80 overflow-hidden border border-slate-800">
+                    <div className="w-full h-2.5 rounded-full bg-slate-900/80 overflow-hidden border border-white/[0.04]">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
-                          ch.completed ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-orange-500 to-amber-400'
+                          ch.completed ? 'bg-emerald-500' : 'bg-orange-500'
                         }`}
                         style={{ width: `${progressPercent}%` }}
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-800/60">
+                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
                     <span className="text-[10px] text-slate-500 font-medium">
                       Ends {new Date(ch.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </span>

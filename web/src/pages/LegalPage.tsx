@@ -15,7 +15,7 @@ export const LegalPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn max-w-2xl mx-auto">
       <div className="text-center space-y-4 py-8">
-        <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center">
+        <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-white/[0.06] mx-auto flex items-center justify-center">
           <FileText size={32} color="#10b981" />
         </div>
         <div>
@@ -24,14 +24,14 @@ export const LegalPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+      <div className="flex gap-2 bg-slate-900 p-1.5 rounded-2xl border border-white/[0.06]">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
               tab === t.id
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -85,7 +85,7 @@ export const LegalPage: React.FC = () => {
             </p>
             <div className="space-y-2 mt-4">
               {['React Native', 'Expo', 'Zustand', 'Lucide Icons', 'React Navigation'].map((lib, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-slate-900 rounded-xl border border-slate-800">
+                <div key={idx} className="flex items-center justify-between p-3 bg-slate-900 rounded-xl border border-white/[0.04]">
                   <span className="text-sm font-semibold text-white">{lib}</span>
                   <span className="text-xs text-slate-400">MIT License</span>
                 </div>

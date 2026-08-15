@@ -99,7 +99,7 @@ export const NotificationsPage: React.FC = () => {
           {unread > 0 && (
             <button
               onClick={markAllNotificationsRead}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-white/[0.06] text-xs font-bold text-slate-300 hover:text-white transition-colors"
             >
               <CheckCheck className="w-3.5 h-3.5" />
               Mark all read
@@ -119,7 +119,7 @@ export const NotificationsPage: React.FC = () => {
 
       {/* ─── Push Permission Banner ─── */}
       {pushPermission !== 'granted' && (
-        <div className="glass-card p-4 flex items-start gap-4 border-emerald-500/20 bg-gradient-to-r from-emerald-950/30 to-teal-950/20">
+        <div className="glass-card p-4 flex items-start gap-4 border-emerald-500/20">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
             <BellRing className="w-5 h-5 text-emerald-400 animate-bounce" />
           </div>
@@ -135,7 +135,7 @@ export const NotificationsPage: React.FC = () => {
             ) : (
               <button
                 onClick={requestPushPermission}
-                className="mt-3 flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 text-xs font-bold hover:opacity-90 transition-opacity"
+                className="mt-3 flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
               >
                 <Bell className="w-3.5 h-3.5" />
                 Enable Notifications
@@ -153,8 +153,8 @@ export const NotificationsPage: React.FC = () => {
             onClick={() => setFilter(tab.id)}
             className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
               filter === tab.id
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
-                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                : 'bg-slate-900 border border-white/[0.06] text-slate-400 hover:text-white hover:border-slate-700'
             }`}
           >
             {tab.label}
@@ -168,7 +168,7 @@ export const NotificationsPage: React.FC = () => {
       {/* ─── Notifications List ─── */}
       {filtered.length === 0 ? (
         <div className="glass-card p-12 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-white/[0.06] mx-auto flex items-center justify-center">
             <BellOff className="w-8 h-8 text-slate-600" />
           </div>
           <div>
@@ -215,7 +215,7 @@ const NotificationCard: React.FC<{
       onClick={handleClick}
       className={`relative flex items-start gap-3.5 p-4 rounded-2xl border transition-all cursor-pointer ${
         notif.read
-          ? 'bg-slate-900/40 border-slate-800/60 hover:border-slate-700'
+          ? 'bg-slate-900/40 border-white/[0.04] hover:border-slate-700'
           : 'bg-slate-900/80 border-slate-700 hover:border-slate-600 shadow-lg'
       }`}
     >

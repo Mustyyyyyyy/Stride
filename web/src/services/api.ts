@@ -50,4 +50,5 @@ export const api = {
   shareActivity: (id: string) => request<any>('/feed/' + id + '/share', { method: 'POST' }),
   login: (data: any) => request<any>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   register: (data: any) => request<any>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+  socialLogin: (data: any) => request<any>('/auth/social', { method: 'POST', body: JSON.stringify(data) }),
 };

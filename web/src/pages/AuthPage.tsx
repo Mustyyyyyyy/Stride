@@ -3,6 +3,8 @@ import { useAppStore } from '../store/useAppStore';
 import {
   Zap, Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle2, AlertCircle, Loader2,
 } from 'lucide-react';
+import { googleProvider, appleProvider, firebaseAuth } from '../firebase/config';
+import { signInWithPopup } from 'firebase/auth';
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'reset-sent';
 
@@ -11,7 +13,7 @@ interface AuthPageProps {
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
-  const { login, register } = useAppStore();
+  const { login, register, socialLogin } = useAppStore();
   const [mode, setMode] = useState<AuthMode>('login');
 
   // Form fields
@@ -30,6 +32,22 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
   const reset = () => {
     setError(null);
     setSuccess(null);
+  };
+
+  const handleSocialLogin = async (providerName: 'google' | 'apple') => {
+    setIsLoading(true);
+    reset();
+    try {
+      const provider = providerName === 'google' ? googleProvider : appleProvider;
+      const result = await signInWithPopup(firebaseAuth, provider);
+      const idToken = await result.user.getIdToken();
+      await socialLogin(idToken, providerName);
+      onAuthenticated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Social login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -74,46 +92,51 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
     setMode('reset-sent');
   };
 
-  const inputBase = 'w-full rounded-xl border bg-slate-950 px-4 py-3 text-sm text-white outline-none transition-all focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 placeholder:text-slate-600';
+  const inputBase = 'w-full rounded-2xl border bg-slate-950/60 px-4 py-3.5 text-sm text-white outline-none transition-all focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 placeholder:text-slate-600';
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10 relative overflow-hidden font-sans">
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-950 to-slate-950 pointer-events-none" />
+      {/* Background depth */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-emerald-500/[0.07] blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-500/[0.06] blur-[100px]" />
+      </div>
 
-      <div className="relative z-10 w-full max-w-md space-y-5">
+      <div className="relative z-10 w-full max-w-md space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-400 mx-auto flex items-center justify-center shadow-xl shadow-emerald-500/30">
+        <div className="text-center space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500 mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/25">
             <Zap className="w-7 h-7 text-slate-950 fill-slate-950" />
           </div>
-          <h1 className="text-2xl font-black font-display text-white tracking-tight">STRIDE</h1>
-          <p className="text-xs text-slate-400">Premium GPS Fitness & Activity Tracker</p>
+          <div>
+            <h1 className="text-2xl font-black font-display text-white tracking-tight">STRIDE</h1>
+            <p className="text-xs text-slate-400 mt-1">Premium GPS Fitness & Activity Tracker</p>
+          </div>
         </div>
 
         {/* Card */}
-        <div className="rounded-3xl border border-slate-800/80 bg-slate-900/80 backdrop-blur-xl p-7 shadow-2xl shadow-black/40 space-y-5">
+        <div className="rounded-3xl border border-white/[0.06] bg-slate-900/70 backdrop-blur-xl p-6 sm:p-8 shadow-2xl shadow-black/40 space-y-5">
 
           {/* ─── LOGIN ─── */}
           {mode === 'login' && (
             <>
-              <div>
+              <div className="space-y-1">
                 <h2 className="text-xl font-extrabold font-display text-white">Welcome back</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Sign in to access your training data</p>
+                <p className="text-xs text-slate-400">Sign in to access your training data</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-3">
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
                   <input id="login-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                    className={`${inputBase} pl-10 border-slate-800`} placeholder="Email address" />
+                    className={`${inputBase} pl-10 border-white/[0.06]`} placeholder="Email address" />
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
                   <input id="login-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)}
-                    className={`${inputBase} pl-10 pr-10 border-slate-800`} placeholder="Password" />
+                    className={`${inputBase} pl-10 pr-10 border-white/[0.06]`} placeholder="Password" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300">
+                    className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors">
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -128,23 +151,23 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
                 {error && <ErrorBanner message={error} />}
 
                 <button type="submit" disabled={isLoading}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60">
+                  className="w-full py-3.5 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors disabled:opacity-60 shadow-lg shadow-emerald-500/20">
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
-              </form>
+               </form>
 
-              <Divider />
-              <SocialButtons />
+               <Divider />
+               <SocialButtons onSocialLogin={handleSocialLogin} isLoading={isLoading} />
 
-              <p className="text-center text-xs text-slate-500">
-                Don't have an account?{' '}
-                <button onClick={() => { setMode('register'); reset(); }} className="text-emerald-400 font-bold hover:text-emerald-300">
-                  Create account
-                </button>
-              </p>
-            </>
-          )}
+               <p className="text-center text-xs text-slate-500">
+                 Don't have an account?{' '}
+                 <button onClick={() => { setMode('register'); reset(); }} className="text-emerald-400 font-bold hover:text-emerald-300">
+                   Create account
+                 </button>
+               </p>
+             </>
+           )}
 
           {/* ─── REGISTER ─── */}
           {mode === 'register' && (
@@ -154,54 +177,54 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
                 <p className="text-xs text-slate-400 mt-0.5">Start tracking your workouts for free</p>
               </div>
 
-              <form onSubmit={handleRegister} className="space-y-3">
-                <div className="relative">
-                  <User className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
-                  <input id="reg-name" type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)}
-                    className={`${inputBase} pl-10 border-slate-800`} placeholder="Full name" />
-                </div>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
-                  <input id="reg-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                    className={`${inputBase} pl-10 border-slate-800`} placeholder="Email address" />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
-                  <input id="reg-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)}
-                    className={`${inputBase} pl-10 pr-10 border-slate-800`} placeholder="Password (min. 6 characters)" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
-                  <input id="reg-confirm" type={showConfirm ? 'text' : 'password'} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`${inputBase} pl-10 pr-10 border-slate-800`} placeholder="Confirm password" />
-                  <button type="button" onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300">
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+               <form onSubmit={handleRegister} className="space-y-3">
+                 <div className="relative">
+                   <User className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
+                   <input id="reg-name" type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)}
+                     className={`${inputBase} pl-10 border-white/[0.06]`} placeholder="Full name" />
+                 </div>
+                 <div className="relative">
+                   <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
+                   <input id="reg-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                     className={`${inputBase} pl-10 border-white/[0.06]`} placeholder="Email address" />
+                 </div>
+                 <div className="relative">
+                   <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
+                   <input id="reg-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)}
+                     className={`${inputBase} pl-10 pr-10 border-white/[0.06]`} placeholder="Password (min. 6 characters)" />
+                   <button type="button" onClick={() => setShowPassword(!showPassword)}
+                     className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors">
+                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                   </button>
+                 </div>
+                 <div className="relative">
+                   <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
+                   <input id="reg-confirm" type={showConfirm ? 'text' : 'password'} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                     className={`${inputBase} pl-10 pr-10 border-white/[0.06]`} placeholder="Confirm password" />
+                   <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                     className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors">
+                     {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                   </button>
+                 </div>
 
-                {error && <ErrorBanner message={error} />}
+                 {error && <ErrorBanner message={error} />}
 
-                <button type="submit" disabled={isLoading}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60">
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  {isLoading ? 'Creating account...' : 'Create Free Account'}
-                </button>
-              </form>
+                 <button type="submit" disabled={isLoading}
+                   className="w-full py-3.5 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors disabled:opacity-60 shadow-lg shadow-emerald-500/20">
+                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                   {isLoading ? 'Creating account...' : 'Create Free Account'}
+                 </button>
+               </form>
 
-              <Divider />
-              <SocialButtons />
+               <Divider />
+               <SocialButtons onSocialLogin={handleSocialLogin} isLoading={isLoading} />
 
-              <p className="text-center text-xs text-slate-500">
-                Already have an account?{' '}
-                <button onClick={() => { setMode('login'); reset(); }} className="text-emerald-400 font-bold hover:text-emerald-300">
-                  Sign in
-                </button>
-              </p>
+               <p className="text-center text-xs text-slate-500">
+                 Already have an account?{' '}
+                 <button onClick={() => { setMode('login'); reset(); }} className="text-emerald-400 font-bold hover:text-emerald-300">
+                   Sign in
+                 </button>
+               </p>
 
               <p className="text-center text-[11px] text-slate-600">
                 By creating an account you agree to our{' '}
@@ -230,7 +253,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
                   <input id="forgot-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                    className={`${inputBase} pl-10 border-slate-800`} placeholder="Your email address" />
+                     className={`${inputBase} pl-10 border-white/[0.06]`} placeholder="Your email address" />
                 </div>
 
                 {error && <ErrorBanner message={error} />}
@@ -288,12 +311,13 @@ const Divider: React.FC = () => (
   </div>
 );
 
-const SocialButtons: React.FC = () => (
+const SocialButtons: React.FC<{ onSocialLogin: (provider: 'google' | 'apple') => void; isLoading: boolean }> = ({ onSocialLogin, isLoading }) => (
   <div className="grid grid-cols-2 gap-3">
     <button
       type="button"
-      onClick={() => alert('Google Sign-In requires setting up Firebase or Google OAuth. Configure VITE_GOOGLE_CLIENT_ID in your .env to enable.')}
-      className="flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-900 hover:border-slate-700 text-xs font-semibold text-white transition-all"
+      onClick={() => onSocialLogin('google')}
+      disabled={isLoading}
+      className="flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-white/[0.06] bg-slate-950 hover:bg-slate-900 hover:border-white/[0.08] text-xs font-semibold text-white transition-all disabled:opacity-60"
     >
       {/* Google SVG Icon */}
       <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -306,8 +330,9 @@ const SocialButtons: React.FC = () => (
     </button>
     <button
       type="button"
-      onClick={() => alert('Apple Sign-In requires Apple Developer Program membership and backend configuration.')}
-      className="flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-900 hover:border-slate-700 text-xs font-semibold text-white transition-all"
+      onClick={() => onSocialLogin('apple')}
+      disabled={isLoading}
+      className="flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-white/[0.06] bg-slate-950 hover:bg-slate-900 hover:border-white/[0.08] text-xs font-semibold text-white transition-all disabled:opacity-60"
     >
       {/* Apple SVG Icon */}
       <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">

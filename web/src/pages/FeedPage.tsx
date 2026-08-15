@@ -206,7 +206,7 @@ export const FeedPage: React.FC = () => {
               key={item.id}
               className="glass-card overflow-hidden"
             >
-              <div className={`p-6 bg-gradient-to-br ${getActivityColor(item.activity.type)} border-b border-slate-800/80`}>
+              <div className={`p-6 border-b border-white/[0.04]`}>
                 <div className="flex items-center gap-3">
                   <img
                     src={item.user.avatar}
@@ -230,35 +230,35 @@ export const FeedPage: React.FC = () => {
 
               <div className="p-5 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-white/[0.06] flex items-center justify-center flex-shrink-0">
                     {getActivityIcon(item.activity.type)}
                   </div>
                   <div className="flex-1">
                     <h4 className="text-base font-extrabold text-white font-display">{item.activity.title}</h4>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-white/[0.06]">
                       {item.activity.type}
                     </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-4 gap-3">
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                  <div className="bg-slate-900/60 p-3 rounded-xl border border-white/[0.04] text-center">
                     <Navigation className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
                     <span className="text-sm font-black text-white font-display block">{displayDist}</span>
                     <span className="text-[10px] text-slate-400 font-semibold uppercase">{distUnit}</span>
                   </div>
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                  <div className="bg-slate-900/60 p-3 rounded-xl border border-white/[0.04] text-center">
                     <Clock className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
                     <span className="text-sm font-black text-white font-display block">{formatDuration(item.activity.duration)}</span>
                     <span className="text-[10px] text-slate-400 font-semibold uppercase">Time</span>
                   </div>
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                  <div className="bg-slate-900/60 p-3 rounded-xl border border-white/[0.04] text-center">
                     <Flame className="w-4 h-4 text-orange-400 mx-auto mb-1" />
                     <span className="text-sm font-black text-orange-400 font-display block">{item.activity.calories}</span>
                     <span className="text-[10px] text-slate-400 font-semibold uppercase">kcal</span>
                   </div>
                   {item.activity.steps > 0 && (
-                    <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                    <div className="bg-slate-900/60 p-3 rounded-xl border border-white/[0.04] text-center">
                       <Footprints className="w-4 h-4 text-purple-400 mx-auto mb-1" />
                       <span className="text-sm font-black text-white font-display block">{item.activity.steps.toLocaleString()}</span>
                       <span className="text-[10px] text-slate-400 font-semibold uppercase">steps</span>
@@ -266,24 +266,24 @@ export const FeedPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
+                <div className="flex items-center justify-between pt-3 border-t border-white/[0.04]">
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => toggleLike(item.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                         item.liked
                           ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                          : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-rose-400'
+                          : 'bg-slate-900 text-slate-400 border border-white/[0.06] hover:text-rose-400'
                       }`}
                     >
                       <Heart className={`w-4 h-4 ${item.liked ? 'fill-rose-400' : ''}`} />
                       <span>{item.likes}</span>
                     </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-slate-400 border border-slate-800 hover:text-cyan-400 text-xs font-bold transition-all">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-slate-400 border border-white/[0.06] hover:text-cyan-400 text-xs font-bold transition-all">
                       <MessageCircle className="w-4 h-4" />
                       <span>{item.comments}</span>
                     </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-slate-400 border border-slate-800 hover:text-emerald-400 text-xs font-bold transition-all">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-slate-400 border border-white/[0.06] hover:text-emerald-400 text-xs font-bold transition-all">
                       <Share2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -292,7 +292,7 @@ export const FeedPage: React.FC = () => {
                     className={`p-2 rounded-xl transition-all ${
                       item.bookmarked
                         ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                        : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-amber-400'
+                        : 'bg-slate-900 text-slate-400 border border-white/[0.06] hover:text-amber-400'
                     }`}
                   >
                     <Bookmark className={`w-4 h-4 ${item.bookmarked ? 'fill-amber-400' : ''}`} />

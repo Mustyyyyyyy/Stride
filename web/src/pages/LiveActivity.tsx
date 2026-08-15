@@ -144,7 +144,7 @@ export const LiveActivity: React.FC = () => {
       <div className="space-y-8 animate-fadeIn max-w-4xl mx-auto my-4">
         {/* Title Header */}
         <div className="glass-card p-6 md:p-8 text-center space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-500 mx-auto flex items-center justify-center shadow-xl shadow-emerald-500/30">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-500 mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/25">
             <Activity className="w-8 h-8 text-slate-950" />
           </div>
           <h2 className="text-3xl font-black font-display text-white">Record Activity</h2>
@@ -159,9 +159,9 @@ export const LiveActivity: React.FC = () => {
             <button
               key={act.type}
               onClick={() => handleStartSpecificActivity(act.type)}
-              className={`p-6 rounded-2xl bg-gradient-to-br ${act.color} border text-left flex items-start gap-4 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all group`}
+              className={`p-6 rounded-2xl border text-left flex items-start gap-4 shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all group ${act.color}`}
             >
-              <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 shadow-md group-hover:scale-110 transition-transform">
+              <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-white/[0.06] shadow-md group-hover:scale-110 transition-transform">
                 {act.icon}
               </div>
               <div className="flex-1 space-y-1">
@@ -169,7 +169,7 @@ export const LiveActivity: React.FC = () => {
                   <h3 className="text-lg font-black font-display text-white group-hover:text-emerald-400 transition-colors">
                     {act.label}
                   </h3>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-950/80 text-emerald-400 border border-emerald-500/30">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-950/80 text-emerald-400 border border-emerald-500/30">
                     START
                   </span>
                 </div>
@@ -191,7 +191,7 @@ export const LiveActivity: React.FC = () => {
         <MapTracker gpsPoints={gpsPoints} isLive={true} height="420px" />
 
         {/* Floating Live Badge */}
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/90 backdrop-blur-md border border-slate-800 text-xs font-bold text-white shadow-xl">
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/90 backdrop-blur-md border border-white/[0.06] text-xs font-bold text-white shadow-xl">
           <span className={`w-2.5 h-2.5 rounded-full ${isPaused ? 'bg-amber-400' : 'bg-emerald-400 animate-ping'}`} />
           <span>{isPaused ? 'PAUSED' : `RECORDING ${selectedActivityType}`}</span>
         </div>
@@ -266,7 +266,7 @@ export const LiveActivity: React.FC = () => {
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs border transition-all ${
             audioCueActive
               ? 'bg-emerald-500 text-slate-950 border-emerald-500'
-              : 'bg-slate-900 text-emerald-400 border-slate-800 hover:border-emerald-500/40'
+               : 'bg-slate-900 text-emerald-400 border-white/[0.06] hover:border-emerald-500/40'
           }`}
         >
           <Volume2 className={`w-4 h-4 ${audioCueActive ? 'animate-bounce' : ''}`} />

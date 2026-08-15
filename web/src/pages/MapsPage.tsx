@@ -67,7 +67,7 @@ export const MapsPage: React.FC = () => {
 
       {/* Search */}
       <div className="flex gap-2">
-        <div className="flex-1 flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3">
+        <div className="flex-1 flex items-center gap-2 bg-slate-900 border border-white/[0.06] rounded-xl px-4 py-3">
           <Search size={18} color="#64748b" />
           <input
             type="text"
@@ -80,14 +80,14 @@ export const MapsPage: React.FC = () => {
         </div>
         <button
           onClick={() => query.trim() && handleSearch(query)}
-          className="px-6 rounded-xl bg-emerald-500 text-slate-950 font-bold text-sm"
+          className="px-6 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-sm hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
         >
           Go
         </button>
       </div>
 
       {/* Map Area */}
-      <div className="h-64 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center gap-3">
+      <div className="h-64 bg-slate-900 border border-white/[0.06] rounded-2xl flex items-center justify-center gap-3">
         <MapPin size={32} color="#64748b" />
         <div>
           <p className="text-white font-bold">Map View</p>
@@ -103,8 +103,8 @@ export const MapsPage: React.FC = () => {
             onClick={() => setCategory(cat.id)}
             className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
               category === cat.id
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
-                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                : 'bg-slate-900 border border-white/[0.06] text-slate-400 hover:text-white hover:border-slate-700'
             }`}
           >
             {cat.label}
@@ -117,7 +117,7 @@ export const MapsPage: React.FC = () => {
         <h2 className="text-lg font-extrabold font-display text-white">Saved Running Routes</h2>
         {routes.map((route) => (
           <div key={route.id} className="glass-card p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-white/[0.06] flex items-center justify-center">
               {getActivityIcon(route.type)}
             </div>
             <div className="flex-1">
@@ -126,7 +126,7 @@ export const MapsPage: React.FC = () => {
             </div>
             <button
               onClick={() => window.open(`https://www.google.com/maps/search/?api=1&q=${encodeURIComponent(route.title)}`, '_blank')}
-              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+              className="p-2 rounded-xl bg-slate-900 border border-white/[0.06] text-slate-400 hover:text-white transition-colors"
             >
               <ExternalLink size={16} />
             </button>

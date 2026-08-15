@@ -1,7 +1,7 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from './dtos/auth.dto';
+import { RegisterDto, LoginDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswordDto } from './dtos/auth.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -34,8 +34,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return {
-      message: `Password reset instructions sent to ${dto.email} if an account exists.`,
-    };
+    return this.authService.forgotPassword(dto);
+  }
+
+  @ApiOperation({ summary: 'Reset password using reset token' })
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }

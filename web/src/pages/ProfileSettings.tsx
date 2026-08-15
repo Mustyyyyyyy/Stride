@@ -91,7 +91,7 @@ export const ProfileSettings: React.FC = () => {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white"
+              className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/[0.06] text-xs text-white focus:outline-none focus:border-emerald-500/60 transition-colors"
             />
           </div>
           <div>
@@ -100,7 +100,7 @@ export const ProfileSettings: React.FC = () => {
               type="number"
               value={weight}
               onChange={(e) => setWeight(Number(e.target.value))}
-              className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white"
+              className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/[0.06] text-xs text-white focus:outline-none focus:border-emerald-500/60 transition-colors"
             />
           </div>
           <div>
@@ -109,13 +109,13 @@ export const ProfileSettings: React.FC = () => {
               type="number"
               value={height}
               onChange={(e) => setHeight(Number(e.target.value))}
-              className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white"
+              className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/[0.06] text-xs text-white focus:outline-none focus:border-emerald-500/60 transition-colors"
             />
           </div>
         </div>
         <button
           type="submit"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 hover:scale-[1.02] transition-transform"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-colors"
         >
           Save Changes
         </button>
@@ -128,7 +128,7 @@ export const ProfileSettings: React.FC = () => {
       <h2 className="text-2xl font-black font-display text-white">Your Workouts</h2>
       {activities.length === 0 ? (
         <div className="glass-card p-12 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-white/[0.06] mx-auto flex items-center justify-center">
             <Target className="w-8 h-8 text-slate-600" />
           </div>
           <div>
@@ -141,7 +141,7 @@ export const ProfileSettings: React.FC = () => {
           {activities.map((act) => (
             <div key={act.id} className="glass-card p-5 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-white/[0.06] flex items-center justify-center flex-shrink-0">
                   {act.type === 'RUNNING' ? <Zap size={20} color="#10b981" /> :
                    act.type === 'WALKING' ? <Footprints size={20} color="#06b6d4" /> :
                    act.type === 'CYCLING' ? <Bike size={20} color="#f97316" /> :
@@ -150,28 +150,28 @@ export const ProfileSettings: React.FC = () => {
                 </div>
                 <div className="flex-1">
                   <h4 className="text-base font-extrabold text-white font-display">{act.title}</h4>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-white/[0.06]">
                     {act.type}
                   </span>
                 </div>
               </div>
               <div className="grid grid-cols-4 gap-3">
-                <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                <div className="bg-slate-900/60 p-3 rounded-xl border border-white/[0.04] text-center">
                   <Navigation className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
                   <span className="text-sm font-black text-white font-display block">{(act.distance / 1000).toFixed(1)}</span>
                   <span className="text-[10px] text-slate-400 font-semibold uppercase">{unitSystem === 'IMPERIAL' ? 'mi' : 'km'}</span>
                 </div>
-                <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                <div className="bg-slate-900/60 p-3 rounded-xl border border-white/[0.04] text-center">
                   <Flame className="w-4 h-4 text-orange-400 mx-auto mb-1" />
                   <span className="text-sm font-black text-orange-400 font-display block">{act.calories}</span>
                   <span className="text-[10px] text-slate-400 font-semibold uppercase">kcal</span>
                 </div>
-                <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                <div className="bg-slate-900/60 p-3 rounded-xl border border-white/[0.04] text-center">
                   <Flame className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
                   <span className="text-sm font-black text-white font-display block">{Math.round(act.duration / 60)}</span>
                   <span className="text-[10px] text-slate-400 font-semibold uppercase">min</span>
                 </div>
-                <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                <div className="bg-slate-900/60 p-3 rounded-xl border border-white/[0.04] text-center">
                   <Footprints className="w-4 h-4 text-purple-400 mx-auto mb-1" />
                   <span className="text-sm font-black text-white font-display block">{act.steps.toLocaleString()}</span>
                   <span className="text-[10px] text-slate-400 font-semibold uppercase">steps</span>
@@ -189,7 +189,7 @@ export const ProfileSettings: React.FC = () => {
       <h2 className="text-2xl font-black font-display text-white">Activities</h2>
       {activities.length === 0 ? (
         <div className="glass-card p-12 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-white/[0.06] mx-auto flex items-center justify-center">
             <Activity className="w-8 h-8 text-slate-600" />
           </div>
           <div>
@@ -202,7 +202,7 @@ export const ProfileSettings: React.FC = () => {
           {activities.map((act) => (
             <div key={act.id} className="glass-card p-5 space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 border border-white/[0.06] flex items-center justify-center">
                   <Target size={18} color="#10b981" />
                 </div>
                 <div>
@@ -228,7 +228,7 @@ export const ProfileSettings: React.FC = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => setActivePage('settings')}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+           className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-white/[0.06] text-xs font-bold text-slate-300 hover:text-white transition-colors"
         >
           <Settings className="w-4 h-4" />
           <span>Settings</span>
@@ -238,14 +238,14 @@ export const ProfileSettings: React.FC = () => {
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+      <div className="flex gap-2 bg-slate-900 p-1.5 rounded-2xl border border-white/[0.06]">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
               tab === t.id
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
                 : 'text-slate-400 hover:text-white'
             }`}
           >

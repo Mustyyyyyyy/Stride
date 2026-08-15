@@ -64,6 +64,7 @@ interface AppState {
   dismissApiError: () => void;
   login: (email: string, password: string) => Promise<void>;
   register: (payload: { email: string; password: string; fullName: string; weight?: number; height?: number }) => Promise<void>;
+  socialLogin: (idToken: string, provider: 'google' | 'apple') => Promise<void>;
   logout: () => void;
 
   // Tracking actions
@@ -297,6 +298,23 @@ export const useAppStore = create<AppState>((set, get) => ({
       await get().hydrateFromApi();
     } catch (err) {
       set({ authError: err instanceof Error ? err.message : 'Unable to create account.', apiError: null, isLoading: false });
+      throw err;
+    }
+  },
+
+  socialLogin: async (idToken, provider) => {
+    set({ isLoading: true, authError: null, apiError: null });
+    try {
+      const response = await api.socialLogin({ idToken, provider });
+      if (response?.accessToken) {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('stride_access_token', response.accessToken);
+        }
+      }
+      set({ user: normalizeUser(response?.user), isAuthenticated: true, isLoading: false });
+      await get().hydrateFromApi();
+    } catch (err) {
+      set({ authError: err instanceof Error ? err.message : 'Unable to sign in with social provider.', apiError: null, isLoading: false });
       throw err;
     }
   },

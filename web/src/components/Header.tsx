@@ -71,13 +71,13 @@ export const Header: React.FC = () => {
     <button
       key={id}
       onClick={() => setActivePage(id)}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all relative ${
+      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all relative ${
         isActive
-          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20 font-bold'
-          : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+          ? 'text-emerald-300'
+          : 'text-slate-300 hover:text-white hover:bg-white/5'
       }`}
     >
-      {icon}
+      <span className={`${isActive ? 'text-emerald-400' : 'text-slate-400'}`}>{icon}</span>
       <span>{label}</span>
       {badge && badge > 0 ? (
         <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-[9px] font-bold text-white flex items-center justify-center">
@@ -85,8 +85,11 @@ export const Header: React.FC = () => {
         </span>
       ) : null}
       {id === 'live-activity' && isTracking ? (
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute top-1 right-1" />
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping absolute top-1 right-1" />
       ) : null}
+      {isActive && (
+        <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-emerald-400" />
+      )}
     </button>
   );
 
@@ -101,14 +104,14 @@ export const Header: React.FC = () => {
             onClick={() => setActivePage('dashboard')}
             className="flex items-center gap-2.5 cursor-pointer group shrink-0"
           >
-            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:scale-105 transition-transform">
               <Zap className="w-5 h-5 md:w-6 md:h-6 text-slate-950 fill-slate-950" />
             </div>
             <span className="font-extrabold text-lg md:text-xl tracking-tight text-white font-display hidden sm:block">STRIDE</span>
           </div>
 
           {/* ─── Desktop navigation (hidden on mobile) ─── */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800/80 overflow-x-auto">
+          <nav className="hidden md:flex items-center gap-0.5 bg-slate-900/60 p-1 rounded-2xl border border-white/5">
             {desktopNavItems.map((item) => (
               <NavBtn key={item.id} {...item} isActive={activePage === item.id} />
             ))}

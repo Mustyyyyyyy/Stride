@@ -59,6 +59,71 @@ export const App: React.FC = () => {
     };
   }, [isAuthenticated]);
 
+  // Service worker update detection - auto-reload when new version is available
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+
+    const registerServiceWorker = async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        
+        // Check for updates when the page becomes visible
+        const handleVisibilityChange = () => {
+          if (document.visibilityState === 'visible') {
+            registration.update();
+          }
+        };
+
+        // Listen for service worker messages (e.g., reload request)
+        const handleMessage = (event: MessageEvent) => {
+          if (event.data && event.data.type === 'RELOAD') {
+            window.location.reload();
+          }
+        };
+
+        // Check for waiting service worker and reload
+        const checkForUpdate = () => {
+          if (registration.waiting) {
+            // New service worker is waiting, reload to activate it
+            window.location.reload();
+          }
+        };
+
+        // Listen for new service worker installing
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version available, reload
+                window.location.reload();
+              }
+            });
+          }
+        });
+
+        // Check periodically for updates
+        const intervalId = setInterval(checkForUpdate, 60 * 60 * 1000); // Every hour
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        navigator.serviceWorker.addEventListener('message', handleMessage as any);
+
+        return () => {
+          clearInterval(intervalId);
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+          navigator.serviceWorker.removeEventListener('message', handleMessage as any);
+        };
+      } catch (err) {
+        console.warn('Service worker registration failed:', err);
+      }
+    };
+
+    const cleanup = registerServiceWorker();
+    return () => {
+      cleanup.then((fn) => fn && fn());
+    };
+  }, [isAuthenticated]);
+
   // Show onboarding for first-time users
   if (showOnboarding) {
     return <OnboardingScreen onFinish={() => {

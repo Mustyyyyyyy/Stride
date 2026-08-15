@@ -64,7 +64,7 @@ export const WorkoutDetail: React.FC = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => setActivePage('history')}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-white/[0.06] text-xs font-bold text-slate-300 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to History</span>
@@ -73,7 +73,7 @@ export const WorkoutDetail: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActivePage('workout-summary', workout.id)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
             title="View shareable workout summary"
           >
             <Share2 className="w-4 h-4" />
@@ -83,7 +83,7 @@ export const WorkoutDetail: React.FC = () => {
           {/* GPX Track Export Button */}
           <button
             onClick={handleExportGpx}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
             title="Download standard .gpx file for Strava or Garmin"
           >
             <Download className="w-4 h-4" />
@@ -213,22 +213,22 @@ export const WorkoutDetail: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-3 pt-2 text-center">
-            <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+            <div className="bg-slate-900/80 p-3 rounded-xl border border-white/[0.04]">
               <span className="text-[10px] text-slate-400 font-semibold block uppercase">Gain</span>
               <span className="text-lg font-black text-white font-display">+{elevation.elevationGainMeters} m</span>
             </div>
-            <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+            <div className="bg-slate-900/80 p-3 rounded-xl border border-white/[0.04]">
               <span className="text-[10px] text-slate-400 font-semibold block uppercase">Peak Alt</span>
               <span className="text-lg font-black text-white font-display">{elevation.maxElevationMeters} m</span>
             </div>
-            <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+            <div className="bg-slate-900/80 p-3 rounded-xl border border-white/[0.04]">
               <span className="text-[10px] text-slate-400 font-semibold block uppercase">Gradient</span>
               <span className="text-lg font-black text-emerald-400 font-display">{elevation.averageGradientPercent}%</span>
             </div>
           </div>
 
           {/* Elevation Slope Visual Line */}
-          <div className="h-24 bg-slate-900/80 rounded-xl p-3 border border-slate-800 flex items-end justify-between gap-1">
+          <div className="h-24 bg-slate-900/80 rounded-xl p-3 border border-white/[0.04] flex items-end justify-between gap-1">
             {elevationBars.map((h, i) => (
               <div key={i} className="flex-1 bg-gradient-to-t from-cyan-600 to-emerald-400 rounded-t-sm" style={{ height: `${h}%` }} />
             ))}

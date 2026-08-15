@@ -61,7 +61,7 @@ export const History: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black font-display text-white">Activity History</h1>
-          <p className="text-slate-400 text-xs font-medium">All your recorded GPS workouts and statistics</p>
+          <p className="text-xs text-slate-400 font-medium">All your recorded GPS workouts and statistics</p>
         </div>
 
         {/* Search Input */}
@@ -72,21 +72,21 @@ export const History: React.FC = () => {
             placeholder="Search workouts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-white/[0.06] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 transition-colors"
           />
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800/80">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/[0.04]">
         {filterOptions.map((opt) => (
           <button
             key={opt.id}
             onClick={() => setSelectedFilter(opt.id)}
             className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               selectedFilter === opt.id
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
-                : 'bg-slate-900/80 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                : 'bg-slate-900/80 text-slate-300 hover:text-white border border-white/[0.06]'
             }`}
           >
             {opt.label}
@@ -109,7 +109,7 @@ export const History: React.FC = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-emerald-400 group-hover:border-emerald-500/40 transition-colors">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-white/[0.06] flex items-center justify-center text-emerald-400 group-hover:border-emerald-500/40 transition-colors">
                     {act.type === 'RUNNING' && <Zap className="w-6 h-6" />}
                     {act.type === 'WALKING' && <Footprints className="w-6 h-6" />}
                     {act.type === 'CYCLING' && <Bike className="w-6 h-6 text-amber-400" />}
@@ -129,20 +129,20 @@ export const History: React.FC = () => {
               </div>
 
               {/* Metrics Summary Row */}
-              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-800/80 text-center">
-                <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
+              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/[0.04] text-center">
+                <div className="bg-slate-900/60 p-2.5 rounded-xl border border-white/[0.04]">
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block">Distance</span>
                   <span className="text-sm font-extrabold text-white font-display">
                     {dist} <span className="text-[10px] text-slate-400 font-bold">{unitStr}</span>
                   </span>
                 </div>
 
-                <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
+                <div className="bg-slate-900/60 p-2.5 rounded-xl border border-white/[0.04]">
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block">Duration</span>
                   <span className="text-sm font-extrabold text-white font-display">{mins} mins</span>
                 </div>
 
-                <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
+                <div className="bg-slate-900/60 p-2.5 rounded-xl border border-white/[0.04]">
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block">Calories</span>
                   <span className="text-sm font-extrabold text-orange-400 font-display">{act.calories} kcal</span>
                 </div>
@@ -154,3 +154,4 @@ export const History: React.FC = () => {
     </div>
   );
 };
+

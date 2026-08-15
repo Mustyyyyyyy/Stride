@@ -166,14 +166,14 @@ export const WorkoutSummary: React.FC = () => {
           <button
             onClick={handleShare}
             disabled={isSharing}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-sm hover:scale-[1.02] transition-transform disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-sm hover:bg-emerald-400 transition-colors disabled:opacity-50 shadow-lg shadow-emerald-500/20"
           >
             <Share2 className="w-4 h-4" />
             Share
           </button>
           <button
             onClick={handleDiscard}
-            className="p-2 rounded-xl bg-slate-800 border border-slate-700 text-rose-400 hover:border-rose-500/40 transition-colors"
+            className="p-2 rounded-xl bg-slate-800 border border-white/[0.06] text-rose-400 hover:border-rose-500/40 transition-colors"
           >
             <Trash2 className="w-5 h-5" />
           </button>
@@ -183,7 +183,7 @@ export const WorkoutSummary: React.FC = () => {
       {/* Workout Header Card */}
       <div className="glass-card p-6 md:p-8">
         <div className="flex items-start gap-4 mb-6">
-          <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800" style={{ borderColor: meta.color + '40' }}>
+          <div className="p-3 rounded-2xl bg-slate-900 border border-white/[0.06]" style={{ borderColor: meta.color + '40' }}>
             {meta.icon}
           </div>
           <div className="flex-1">
@@ -195,20 +195,20 @@ export const WorkoutSummary: React.FC = () => {
         </div>
 
         {/* Time Details */}
-        <div className="bg-slate-900/50 rounded-2xl p-4 md:p-6 border border-slate-800 mb-6">
+        <div className="bg-slate-900/50 rounded-2xl p-4 md:p-6 border border-white/[0.04] mb-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex-1 text-center">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Started</p>
               <p className="text-sm font-bold text-white">{startInfo.date}</p>
               <p className="text-xs text-slate-400">{startInfo.time}</p>
             </div>
-            <div className="hidden md:block w-px h-12 bg-slate-800" />
+            <div className="hidden md:block w-px h-12 bg-white/[0.04]" />
             <div className="flex-1 text-center">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Finished</p>
               <p className="text-sm font-bold text-white">{endInfo.date}</p>
               <p className="text-xs text-slate-400">{endInfo.time}</p>
             </div>
-            <div className="hidden md:block w-px h-12 bg-slate-800" />
+            <div className="hidden md:block w-px h-12 bg-white/[0.04]" />
             <div className="flex-1 text-center">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Duration</p>
               <div className="flex items-center justify-center gap-2">
@@ -309,7 +309,7 @@ export const WorkoutSummary: React.FC = () => {
               </span>
             )}
           </div>
-          <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden" style={{ height: '320px' }}>
+          <div className="bg-slate-900 rounded-2xl border border-white/[0.06] overflow-hidden" style={{ height: '320px' }}>
             <svg width="100%" height="100%" viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet">
               <defs>
                 <linearGradient id="routeGrad" x1="0" y1="0" x2="1" y2="0">

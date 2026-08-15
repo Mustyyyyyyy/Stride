@@ -11,6 +11,7 @@ interface AuthState {
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<boolean>;
   register: (name: string, email: string, pass: string) => Promise<boolean>;
+  socialLogin: (idToken: string, provider: 'google' | 'apple') => Promise<boolean>;
   logout: () => void;
   updateProfile: (profileData: Partial<UserProfile>) => Promise<void>;
   hydrateFromApi: () => Promise<void>;
@@ -71,6 +72,41 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       const res = await api.register({ fullName, email, password });
+      const user: UserProfile = {
+        id: res.user.id,
+        email: res.user.email,
+        fullName: res.user.fullName,
+        profilePhoto: res.user.profilePhoto,
+        weight: res.user.weight || 70,
+        height: res.user.height || 175,
+        gender: res.user.gender || 'MALE',
+        unitSystem: res.user.unitSystem || 'METRIC',
+        theme: res.user.theme || 'DARK',
+      };
+
+      if (res.accessToken) Storage.setString(KEYS.ACCESS_TOKEN, res.accessToken);
+      if (res.refreshToken) Storage.setString(KEYS.REFRESH_TOKEN, res.refreshToken);
+      Storage.setString(KEYS.USER, JSON.stringify(user));
+      getOrCreateDeviceId();
+
+      set({
+        user,
+        accessToken: res.accessToken,
+        refreshToken: res.refreshToken,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      return true;
+    } catch {
+      set({ isLoading: false });
+      return false;
+    }
+  },
+
+  socialLogin: async (idToken, provider) => {
+    set({ isLoading: true });
+    try {
+      const res = await api.socialLogin({ idToken, provider });
       const user: UserProfile = {
         id: res.user.id,
         email: res.user.email,

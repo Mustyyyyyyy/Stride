@@ -121,14 +121,14 @@ export const Stats: React.FC = () => {
         </div>
 
         {/* Period Selector Tabs */}
-        <div className="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+        <div className="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-2xl border border-white/[0.06]">
           {periodOptions.map((opt) => (
             <button
               key={opt.id}
               onClick={() => setPeriod(opt.id)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 period === opt.id
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                  ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -160,7 +160,7 @@ export const Stats: React.FC = () => {
                   {dist} km
                 </span>
                 <div
-                  className={`w-full max-w-[40px] rounded-xl bg-gradient-to-t from-emerald-600 via-teal-500 to-cyan-400 group-hover:brightness-125 transition-all shadow-lg shadow-emerald-500/10 ${dist === 0 ? 'opacity-30' : ''}`}
+                  className={`w-full max-w-[40px] rounded-xl bg-emerald-500 group-hover:brightness-125 transition-all shadow-lg shadow-emerald-500/10 ${dist === 0 ? 'opacity-30' : ''}`}
                   style={{ height: `${Math.max(4, heightPercent)}%` }}
                 />
                 <span className="text-xs font-bold text-slate-400 mt-1">{chartData.labels[idx]}</span>

@@ -29,7 +29,7 @@ export const SupportPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn max-w-2xl mx-auto">
       <div className="text-center space-y-4 py-8">
-        <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center">
+        <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-white/[0.06] mx-auto flex items-center justify-center">
           <HelpCircle size={32} color="#10b981" />
         </div>
         <div>
@@ -45,9 +45,9 @@ export const SupportPage: React.FC = () => {
             href={option.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="glass-card p-5 flex items-center gap-4 hover:border-slate-700 transition-all"
+            className="glass-card p-5 flex items-center gap-4 hover:border-white/[0.08] transition-all"
           >
-            <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-slate-900 border border-white/[0.06] flex items-center justify-center">
               {option.icon}
             </div>
             <div className="flex-1">
