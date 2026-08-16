@@ -5,6 +5,7 @@ import { useAppStore } from '../store/useAppStore';
 import { useActivityStore } from '../store/useActivityStore';
 import { Settings, ChevronRight, Moon, Sun, Mail, Shield, Bell, HelpCircle, FileText, Info, LogOut, MapPin, Navigation, Footprints } from 'lucide-react-native';
 import { api } from '../services/api';
+import { permissionService } from '../services/PermissionService';
 import { useColorScheme } from 'react-native';
 
 interface SettingsScreenProps {
@@ -35,10 +36,39 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate }) =>
   const handleToggleBackgroundSteps = async () => {
     setBgStepsLoading(true);
     try {
+      if (!backgroundStepsEnabled) {
+        const granted = await permissionService.requestActivityRecognition();
+        if (!granted) {
+          Alert.alert('Permission Required', 'Activity recognition permission is needed for background step counting.');
+          return;
+        }
+      }
       await setBackgroundStepsEnabled(!backgroundStepsEnabled);
     } finally {
       setBgStepsLoading(false);
     }
+  };
+
+  const handleToggleLocation = async () => {
+    if (!locationEnabled) {
+      const granted = await permissionService.requestLocation();
+      if (!granted) {
+        Alert.alert('Permission Required', 'Location permission is needed for GPS tracking.');
+        return;
+      }
+    }
+    setLocationEnabled(!locationEnabled);
+  };
+
+  const handleToggleNotifications = async () => {
+    if (!notificationsEnabled) {
+      const granted = await permissionService.requestNotification();
+      if (!granted) {
+        Alert.alert('Permission Required', 'Notification permission is needed for workout alerts.');
+        return;
+      }
+    }
+    setNotificationsEnabled(!notificationsEnabled);
   };
 
   const handleLogout = () => {
@@ -150,7 +180,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate }) =>
               <Text style={styles.settingValue}>Required for GPS tracking</Text>
             </View>
             <TouchableOpacity
-              onPress={() => setLocationEnabled(!locationEnabled)}
+              onPress={handleToggleLocation}
               style={[styles.toggleBtn, locationEnabled && styles.toggleBtnActive]}
             >
               <Text style={[styles.toggleBtnText, locationEnabled && styles.toggleBtnTextActive]}>
@@ -187,7 +217,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate }) =>
               <Text style={styles.settingValue}>Workout reminders and alerts</Text>
             </View>
             <TouchableOpacity
-              onPress={() => setNotificationsEnabled(!notificationsEnabled)}
+              onPress={handleToggleNotifications}
               style={[styles.toggleBtn, notificationsEnabled && styles.toggleBtnActive]}
             >
               <Text style={[styles.toggleBtnText, notificationsEnabled && styles.toggleBtnTextActive]}>

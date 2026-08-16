@@ -135,12 +135,12 @@ export const App: React.FC = () => {
   // Wait for initial hydration check
   if (!hydrated) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-brand-bg text-brand-text">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-400 flex items-center justify-center animate-pulse">
             <span className="text-2xl">⚡</span>
           </div>
-          <p className="text-slate-400 text-sm font-semibold animate-pulse">Loading Stride…</p>
+          <p className="text-brand-text-muted text-sm font-semibold animate-pulse">Loading Stride…</p>
         </div>
       </div>
     );
@@ -156,7 +156,7 @@ export const App: React.FC = () => {
 
   // Main app for authenticated users
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans">
+    <div className="min-h-screen flex flex-col bg-brand-bg text-brand-text font-sans">
       <Header />
 
       {/* Offline Mode Banner (only shown when offline) */}

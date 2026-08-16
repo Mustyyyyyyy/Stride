@@ -41,7 +41,7 @@ export default function App() {
   useEffect(() => {
     let mounted = true;
     const init = async () => {
-      await permissionService.requestAllPermissions();
+      // Do not auto-request permissions; features will request on demand
       if (mounted) {
         await backgroundStepService.start();
       }

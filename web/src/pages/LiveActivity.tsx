@@ -27,10 +27,25 @@ export const LiveActivity: React.FC = () => {
     unitSystem,
   } = useAppStore();
 
-  const hrZones = TelemetryAnalyzer.calculateHrZones({ type: selectedActivityType } as any);
-  const primaryZone = hrZones.zone3AerobicPercent > hrZones.zone4AnaerobicPercent ? 'Zone 3 (Aerobic)' : 'Zone 4 (Anaerobic)';
-  const targetLow = Math.round(hrZones.estimatedAvgHr * 0.85);
-  const targetHigh = hrZones.estimatedAvgHr;
+  let hrZones: ReturnType<typeof TelemetryAnalyzer.calculateHrZones> | null = null;
+  try {
+    hrZones = TelemetryAnalyzer.calculateHrZones({
+      type: selectedActivityType,
+      averageSpeed: currentSpeedMs || 1.5,
+      distance: distanceMeters,
+      duration: elapsedSeconds,
+    } as any);
+  } catch {
+    hrZones = null;
+  }
+
+  const primaryZone = hrZones
+    ? hrZones.zone3AerobicPercent > hrZones.zone4AnaerobicPercent
+      ? 'Zone 3 (Aerobic)'
+      : 'Zone 4 (Anaerobic)'
+    : 'Tracking';
+  const targetLow = hrZones ? Math.round(hrZones.estimatedAvgHr * 0.85) : 0;
+  const targetHigh = hrZones ? hrZones.estimatedAvgHr : 0;
 
   const [audioCueActive, setAudioCueActive] = useState(false);
   const lastMilestoneKm = useRef(0);
